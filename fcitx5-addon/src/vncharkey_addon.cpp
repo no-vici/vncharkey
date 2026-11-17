@@ -17,6 +17,10 @@
 #include <sstream>
 #include <cstring>
 #include <cctype>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 extern char **environ;
 
@@ -123,6 +127,7 @@ VnCharKeyEngine::VnCharKeyEngine(fcitx::AddonManager* manager)
     ctx_vni_ = fcitx5_vncharkey_init_with_method(2);
     loadConfig();
     setupStatusMenu();
+    startIpcServer();
 
     // Register all actions with Fcitx5 UserInterfaceManager for Status Area and Main Menu
     if (manager_ && manager_->instance()) {
@@ -140,6 +145,7 @@ VnCharKeyEngine::VnCharKeyEngine(fcitx::AddonManager* manager)
 }
 
 VnCharKeyEngine::~VnCharKeyEngine() {
+    stopIpcServer();
     if (manager_ && manager_->instance()) {
         auto& uiMgr = manager_->instance()->userInterfaceManager();
         if (statusAction_) uiMgr.unregisterAction(statusAction_.get());
@@ -916,6 +922,13 @@ void VnCharKeyEngine::loadConfig() {
                 if (start != std::string::npos && end != std::string::npos) {
                     config_flip_shortcut_ = val.substr(start, end - start + 1);
                 }
+            } else if (line.rfind("CaseConverterShortcut=", 0) == 0) {
+                std::string val = line.substr(22);
+                size_t start = val.find_first_not_of(" \t\"'");
+                size_t end = val.find_last_not_of(" \t\"'");
+                if (start != std::string::npos && end != std::string::npos) {
+                    config_case_converter_shortcut_ = val.substr(start, end - start + 1);
+                }
             } else if (line.rfind("SpellCheck=", 0) == 0) {
                 config_spell_check_ = (line.find("False") == std::string::npos);
             } else if (line.rfind("EnableDictionary=", 0) == 0) {
@@ -1105,7 +1118,7 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
     }
 
     std::string mode = getOutputModeForContext(ic);
-    if (mode.rfind("Bypass", 0) == 0 || mode == "OFF") {
+    if (neovim_bypass_ || mode.rfind("Bypass", 0) == 0 || mode == "OFF") {
         fcitx5_vncharkey_reset(ctx);
         return;
     }
@@ -1215,12 +1228,31 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
         }
     }
 
-    // Case Converter shortcut (Ctrl+Shift+U): instantly cycle casing (lower -> UPPER -> Title Case)
+    // Case Converter shortcut: instantly cycle casing (lower -> UPPER -> Title Case)
     // Works either on currently composing active word, or on highlighted/selected text via SurroundingText!
-    bool isCaseConverter = states.test(fcitx::KeyState::Ctrl) &&
-                           states.test(fcitx::KeyState::Shift) &&
-                           !states.test(fcitx::KeyState::Alt) &&
-                           (sym == FcitxKey_U || sym == FcitxKey_u);
+    // Configurable options: "Ctrl+Shift+U", "Ctrl+Shift+C", "Alt+C", "Ctrl+Alt+U", or "Disabled"
+    bool isCaseConverter = false;
+    if (config_case_converter_shortcut_ == "Ctrl+Shift+U") {
+        isCaseConverter = states.test(fcitx::KeyState::Ctrl) &&
+                          states.test(fcitx::KeyState::Shift) &&
+                          !states.test(fcitx::KeyState::Alt) &&
+                          (sym == FcitxKey_U || sym == FcitxKey_u);
+    } else if (config_case_converter_shortcut_ == "Ctrl+Shift+C") {
+        isCaseConverter = states.test(fcitx::KeyState::Ctrl) &&
+                          states.test(fcitx::KeyState::Shift) &&
+                          !states.test(fcitx::KeyState::Alt) &&
+                          (sym == FcitxKey_C || sym == FcitxKey_c);
+    } else if (config_case_converter_shortcut_ == "Alt+C") {
+        isCaseConverter = states.test(fcitx::KeyState::Alt) &&
+                          !states.test(fcitx::KeyState::Ctrl) &&
+                          !states.test(fcitx::KeyState::Shift) &&
+                          (sym == FcitxKey_C || sym == FcitxKey_c);
+    } else if (config_case_converter_shortcut_ == "Ctrl+Alt+U") {
+        isCaseConverter = states.test(fcitx::KeyState::Ctrl) &&
+                          states.test(fcitx::KeyState::Alt) &&
+                          !states.test(fcitx::KeyState::Shift) &&
+                          (sym == FcitxKey_U || sym == FcitxKey_u);
+    }
 
     if (isCaseConverter) {
         // Priority 1: If there is an active composing word
@@ -1763,6 +1795,181 @@ size_t VnCharKeyEngine::utf8CharCount(const std::string& str) const {
         if ((c & 0xC0) != 0x80) count++;
     }
     return count;
+}
+
+void VnCharKeyEngine::handleIpcCommand(const std::string& raw_cmd) {
+    std::string cmd = raw_cmd;
+    size_t end = cmd.find_last_not_of(" \t\r\n");
+    if (end != std::string::npos) {
+        cmd = cmd.substr(0, end + 1);
+    }
+    size_t start = cmd.find_first_not_of(" \t\r\n-");
+    if (start != std::string::npos) {
+        cmd = cmd.substr(start);
+    }
+    for (char& c : cmd) c = std::tolower(c);
+
+    if (cmd == "off" || cmd == "bypass_on" || cmd == "disable") {
+        neovim_bypass_ = true;
+        if (ctx_auto_) fcitx5_vncharkey_reset(ctx_auto_);
+        if (ctx_telex_) fcitx5_vncharkey_reset(ctx_telex_);
+        if (ctx_vni_) fcitx5_vncharkey_reset(ctx_vni_);
+    } else if (cmd == "on" || cmd == "bypass_off" || cmd == "enable") {
+        neovim_bypass_ = false;
+    } else if (cmd == "toggle") {
+        neovim_bypass_ = !neovim_bypass_;
+        if (neovim_bypass_) {
+            if (ctx_auto_) fcitx5_vncharkey_reset(ctx_auto_);
+            if (ctx_telex_) fcitx5_vncharkey_reset(ctx_telex_);
+            if (ctx_vni_) fcitx5_vncharkey_reset(ctx_vni_);
+        }
+    }
+}
+
+void VnCharKeyEngine::startIpcServer() {
+    const char* sock_path = "/tmp/vncharkey.sock";
+    unlink(sock_path);
+
+    int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    if (fd < 0) return;
+    ipc_server_fd_ = fd;
+
+    struct sockaddr_un addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    std::strncpy(addr.sun_path, sock_path, sizeof(addr.sun_path) - 1);
+
+    if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
+        close(fd);
+        ipc_server_fd_ = -1;
+        return;
+    }
+
+    if (listen(fd, 10) != 0) {
+        close(fd);
+        ipc_server_fd_ = -1;
+        return;
+    }
+
+    chmod(sock_path, 0666);
+
+    if (manager_ && manager_->instance()) {
+        auto& loop = manager_->instance()->eventLoop();
+        ipcServerSource_ = loop.addUnixFD(fd, fcitx::IOEventFlag::In, [this](fcitx::EventSource*, int server_fd, fcitx::IOEventFlags) {
+            struct sockaddr_un client_addr;
+            socklen_t client_len = sizeof(client_addr);
+            int client_fd = accept4(server_fd, (struct sockaddr*)&client_addr, &client_len, SOCK_NONBLOCK | SOCK_CLOEXEC);
+            if (client_fd >= 0) {
+                char buf[256];
+                ssize_t n = read(client_fd, buf, sizeof(buf) - 1);
+                if (n > 0) {
+                    buf[n] = '\0';
+                    handleIpcCommand(std::string(buf, n));
+                    const char reply[] = "OK\n";
+                    (void)write(client_fd, reply, sizeof(reply) - 1);
+                }
+                close(client_fd);
+            }
+            return true;
+        });
+    }
+}
+
+void VnCharKeyEngine::stopIpcServer() {
+    ipcServerSource_.reset();
+    ipcClientSources_.clear();
+    if (ipc_server_fd_ >= 0) {
+        close(ipc_server_fd_);
+        ipc_server_fd_ = -1;
+    }
+    unlink("/tmp/vncharkey.sock");
+}
+
+void VnCharKeyEngine::handleIpcCommand(const std::string& raw_cmd) {
+    std::string cmd = raw_cmd;
+    size_t end = cmd.find_last_not_of(" \t\r\n");
+    if (end != std::string::npos) {
+        cmd = cmd.substr(0, end + 1);
+    }
+    size_t start = cmd.find_first_not_of(" \t\r\n-");
+    if (start != std::string::npos) {
+        cmd = cmd.substr(start);
+    }
+    for (char& c : cmd) c = std::tolower(c);
+
+    if (cmd == "off" || cmd == "bypass_on" || cmd == "disable") {
+        neovim_bypass_ = true;
+        if (ctx_auto_) fcitx5_vncharkey_reset(ctx_auto_);
+        if (ctx_telex_) fcitx5_vncharkey_reset(ctx_telex_);
+        if (ctx_vni_) fcitx5_vncharkey_reset(ctx_vni_);
+    } else if (cmd == "on" || cmd == "bypass_off" || cmd == "enable") {
+        neovim_bypass_ = false;
+    } else if (cmd == "toggle") {
+        neovim_bypass_ = !neovim_bypass_;
+        if (neovim_bypass_) {
+            if (ctx_auto_) fcitx5_vncharkey_reset(ctx_auto_);
+            if (ctx_telex_) fcitx5_vncharkey_reset(ctx_telex_);
+            if (ctx_vni_) fcitx5_vncharkey_reset(ctx_vni_);
+        }
+    }
+}
+
+void VnCharKeyEngine::startIpcServer() {
+    const char* sock_path = "/tmp/vncharkey.sock";
+    unlink(sock_path);
+
+    int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    if (fd < 0) return;
+    ipc_server_fd_ = fd;
+
+    struct sockaddr_un addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    std::strncpy(addr.sun_path, sock_path, sizeof(addr.sun_path) - 1);
+
+    if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
+        close(fd);
+        ipc_server_fd_ = -1;
+        return;
+    }
+
+    if (listen(fd, 10) != 0) {
+        close(fd);
+        ipc_server_fd_ = -1;
+        return;
+    }
+
+    chmod(sock_path, 0666);
+
+    if (manager_ && manager_->instance()) {
+        auto& loop = manager_->instance()->eventLoop();
+        ipcServerSource_ = loop.addIOEvent(fd, fcitx::IOEventFlag::In, [this](fcitx::EventSourceIO*, int server_fd, fcitx::IOEventFlags) {
+            struct sockaddr_un client_addr;
+            socklen_t client_len = sizeof(client_addr);
+            int client_fd = accept4(server_fd, (struct sockaddr*)&client_addr, &client_len, SOCK_NONBLOCK | SOCK_CLOEXEC);
+            if (client_fd >= 0) {
+                char buf[256];
+                ssize_t n = read(client_fd, buf, sizeof(buf) - 1);
+                if (n > 0) {
+                    buf[n] = '\0';
+                    handleIpcCommand(std::string(buf, n));
+                    const char reply[] = "OK\n";
+                    (void)write(client_fd, reply, sizeof(reply) - 1);
+                }
+                close(client_fd);
+            }
+            return true;
+        });
+    }
+}
+
+void VnCharKeyEngine::stopIpcServer() {
+    ipcServerSource_.reset();
+    if (ipc_server_fd_ >= 0) {
+        close(ipc_server_fd_);
+        ipc_server_fd_ = -1;
+    }
+    unlink("/tmp/vncharkey.sock");
 }
 
 fcitx::AddonInstance *VnCharKeyEngineFactory::create(fcitx::AddonManager *manager) {
