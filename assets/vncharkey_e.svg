@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Light blue rounded box -->
+  <rect x="24" y="24" width="208" height="208" rx="40" fill="#E8EEFF" stroke="#0000FF" stroke-width="8"/>
+  <!-- Big blue E centered in box -->
+  <text x="128" y="210" font-family="Candara" font-size="250" font-weight="bold" text-anchor="middle" fill="#0000FF">E</text>
+</svg>

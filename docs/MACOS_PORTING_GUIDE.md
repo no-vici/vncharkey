@@ -397,7 +397,7 @@ public class KeyTapManager {
 
 ### Bước 4: Giao Diện Menu Bar `main.swift`
 
-Tạo file `macos/Sources/main.swift`. Đây là ứng dụng thanh trạng thái góc phải phía trên màn hình, nạp icon VnCharKey với hình tượng Nón Lá và chữ V cách điệu hiện đại:
+Tạo file `macos/Sources/main.swift`. Đây là ứng dụng thanh trạng thái góc phải phía trên màn hình, nạp icon cờ vàng truyền thống:
 
 ```swift
 import Cocoa

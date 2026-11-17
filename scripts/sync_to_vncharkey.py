@@ -69,6 +69,14 @@ CUSTOM_ASSETS = {
     "windows/assets/vncharkey.png",
 }
 
+def is_custom_asset(rel_src_str: str) -> bool:
+    """Return True if the asset is custom in VnCharKey and shouldn't be overwritten."""
+    if rel_src_str in CUSTOM_ASSETS:
+        return True
+    if "data/icons/" in rel_src_str:
+        return True
+    return False
+
 def transform_name(name: str) -> str:
     """Transforms filenames/directory names from vncharkey to vncharkey."""
     res = name
@@ -141,7 +149,7 @@ def sync():
             rel_str = str(rel_src).replace("\\", "/")
 
             # Check if this file is a custom logo in VnCharKey and already exists
-            if rel_str in CUSTOM_ASSETS and dest_file.exists():
+            if is_custom_asset(rel_str) and dest_file.exists():
                 skipped_count += 1
                 continue
 

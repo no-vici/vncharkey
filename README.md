@@ -1,13 +1,13 @@
-# VnCharKey
+# VnCharKey (Tự Do Edition)
 
 <div align="center">
 
 <img src="assets/logo.png" alt="VnCharKey Official Logo" width="128" height="128" />
 
-**Bộ gõ Tiếng Việt mượt mà, gõ sướng tay cho Linux, macOS & Windows**  
-*Viết bằng Rust kết hợp Native C++ Fcitx5 Module & Cocoa / Win32.*  
-*Học hỏi và gom nhặt tinh hoa từ **OpenViet IME**, **OpenKey**, **GoNhanh**, **VietC** cùng thuật toán Micro-diff từ **Lilypad**.*  
-*Biểu tượng hài hòa giữa hình tượng Nón Lá truyền thống và chữ V mang phong cách hiện đại.*
+**Bộ Gõ Tiếng Việt Hiệu Năng Cao Cho Linux, macOS & Windows**  
+*Được phát triển bằng Rust kết hợp Native C++ Fcitx5 Module & Cocoa / Win32.*  
+*Hội tụ tinh hoa xử lý biến âm từ **OpenViet IME**, **OpenKey**, **GoNhanh**, **VietC** và thuật toán Micro-diff từ **Lilypad**.*  
+*Mang đậm tinh thần Tự Do và Di sản Cờ Vàng Ba Sọc Đỏ.*
 
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-orange.svg?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/License-GNU%20GPL%203.0-blue.svg?style=flat-square)](LICENSE)
@@ -20,6 +20,8 @@
 </div>
 
 ---
+
+*Nếu bạn hông thích biểu tượng của bộ gõ thì hãy bỏ qua và lựa chọn những bộ khác với những tính năng vượt trội tương tự như [fcitx5-lilypad](https://github.com/chiconcota/fcitx5-lilypad) (chiconcota). Xin đừng vì sự khác biệt về ý thức hệ hay quan điểm chánh trị mà report đứa con tinh thần của một coding learner thật sự yêu tự do trên từng ký tự anh ta gõ xuống.*
 
 ## 📖 Mục Lục
 
@@ -52,13 +54,13 @@
 
 ## 1. Tổng Quan Kiến Trúc Thực Tế
 
-**VnCharKey** được thiết kế như một module native chạy thẳng bên trong **Fcitx5** – khung nhập liệu chuẩn mực và ổn định nhất trên Linux hiện nay. 
+**VnCharKey** được xây dựng như một module native tích hợp trực tiếp vào framework **Fcitx5** – khung nhập liệu chuẩn mực và phổ biến nhất trên Linux hiện nay. 
 
-Thay vì phải chạy một tiến trình daemon ngoài cần quyền root để can thiệp kernel, **VnCharKey** hoạt động trực tiếp trong không gian người dùng của Fcitx5:
-- **Lõi xử lý Tiếng Việt viết bằng Rust (`vncharkey-core`)**: Quản lý bộ máy trạng thái (State Machine) của từng âm tiết, kiểm tra luật chính tả, bỏ dấu thanh chuẩn xác và tự khôi phục từ tiếng Anh khi gõ code.
-- **Cầu nối C-ABI (`fcitx5-vncharkey-ffi`)**: Giao diện extern C an toàn, mỏng nhẹ, chuyển dữ liệu trực tiếp giữa Rust và C++/Swift mà không tốn chi phí copy rườm rà.
-- **Module Fcitx5 Native Addon (`fcitx5-addon`)**: Plugin C++ biên dịch thành `fcitx5-vncharkey-addon.so`, nạp thẳng vào Fcitx5 Server, tương thích mượt mà với cả Wayland (Sway, Hyprland, GNOME, KDE) lẫn X11.
-- **Ứng dụng cài đặt (`vncharkey-settings`)**: Viết 100% bằng Rust với thư viện đồ hoạ `egui` / `eframe`, mở lên ngay trong chớp mắt, giao diện nhẹ nhàng và đồng bộ trực tiếp với file cấu hình của Fcitx5.
+Thay vì phải chạy tiến trình daemon ngoài với quyền root để can thiệp kernel, **VnCharKey** hoạt động trực tiếp trong không gian người dùng của Fcitx5:
+- **Lõi xử lý Tiếng Việt viết bằng Rust (`vncharkey-core`)**: Quản lý toàn bộ State Machine của âm tiết, kiểm tra luật ngữ âm, đặt dấu thanh và khôi phục từ tiếng Anh.
+- **Cầu nối C-ABI (`fcitx5-vncharkey-ffi`)**: Cung cấp giao diện hàm extern C an toàn, truyền nhận dữ liệu trực tiếp giữa Rust và C++.
+- **Module Fcitx5 Native Addon (`fcitx5-addon`)**: Plugin C++ biên dịch thành `fcitx5-vncharkey-addon.so`, nạp trực tiếp vào Fcitx5 Server, tương thích hoàn hảo với cả Wayland (Sway, Hyprland, GNOME, KDE) và X11.
+- **Ứng dụng thiết lập các tính năng (`vncharkey-settings`)**: 100% Rust viết bằng thư viện đồ hoạ `egui` / `eframe`, khởi động tức thì, tinh tế và đồng bộ trực tiếp với file cấu hình Fcitx5.
 
 ---
 
@@ -114,45 +116,46 @@ fcitx5-vncharkey/
 
 ### 3.1. Thuật Toán Micro-diff Minimal Replacement
 Được tối ưu từ nguyên lý của `fcitx5-lilypad` (`compareAndSplitStrings`):
-- Khi biến đổi âm tiết (ví dụ: gõ `toan` rồi thêm `s` $\to$ `toán`), thay vì phải xóa cả từ rồi gõ lại từ đầu, bộ gõ sẽ tìm **Tiền Tố Chung Dài Nhất (Longest Common Prefix)**:
-  - Chỉ xóa lùi đúng $1$ ký tự `n` (`backspaces = 1`).
-  - Rồi đẩy tiếp chuỗi `án` vào (`commit_text = "án"`).
-- **Kết quả**: Triệt tiêu hoàn toàn hiện tượng nhấp nháy chữ hoặc giật lag con trỏ trong các editor hiện đại (VS Code, Cursor, Zed, Sublime Text).
+- Khi biến đổi âm tiết (ví dụ: `toan` + `s` $\to$ `toán`), thay vì xóa toàn bộ từ rồi gõ lại từ đầu, engine tìm **Tiền Tố Chung Dài Nhất (Longest Common Prefix)**:
+  - Chỉ xóa lùi chính xác $1$ ký tự `n` (`backspaces = 1`).
+  - Gởi tiếp chuỗi `án` (`commit_text = "án"`).
+- **Kết quả**: Triệt tiêu hoàn toàn hiện tượng nhấp nháy chữ và giật lag con trỏ trong editor hiện đại (VS Code, Cursor, Zed, Sublime Text).
 
 ---
 
 ### 3.2. Chế Độ Xuất Chữ Kép: Direct Mode & Preedit Mode (Đặc Trị Google Docs & Web App)
-Giải quyết dứt điểm nỗi ám ảnh muôn thuở của anh em dùng Linux: **lặp chữ và nhảy con trỏ lung tung** trên các ứng dụng nền tảng Canvas hoặc web động (Google Docs, Slack, Discord, Sider.ai...):
+Giải quyết triệt để vấn đề kinh điển của các bộ gõ trên Linux: **lặp chữ và nhảy con trỏ** trên các ứng dụng nền tảng Canvas hoặc React/Vue (Google Docs, StackEdit, Sider.ai, Slack, Discord...).
 
-- **Chế độ Gõ Trực Tiếp (Direct Mode - Sinh ra cho Coder / Terminal / Code Editor)**:
-  - Dùng thuật toán Micro-diff: gửi phím Backspace giả lập và đưa phần đuôi biến đổi vào ngay lập tức.
-  - Phản hồi cực nhanh (độ trễ gần như bằng $0$), mang lại cảm giác gõ phím "mộc" và thật tay trên Neovim, VS Code, Cursor, Zed, Alacritty, Kitty.
-- **Chế độ Gõ Gạch Chân (Preedit Mode - Vị cứu tinh của Web / Google Docs / Ứng dụng Chat)**:
-  - Xử lý tận gốc nguyên nhân gây lặp chữ: **Tuyệt đối không gửi phím Backspace giả lập ra ứng dụng bên ngoài**.
-  - Từ đang gõ được giữ tạm bằng nét gạch chân (`setClientPreedit`) và được chốt gọn gàng một lần duy nhất (`commitString`) ngay khi bạn nhấn phím cách (Space), Enter hoặc dấu chấm, phẩy.
-  - **Khung chữ nổi (Floating Preedit Tooltip)**: Hiển thị từ đang gõ trong một ô nổi nhỏ ngay sát con trỏ cho các ứng dụng tự vẽ Canvas như Google Docs (nơi trình duyệt không vẽ được nét gạch chân nội dòng). Nếu cảm thấy vướng mắt, bạn hoàn toàn có thể tắt mở nhanh trên Menu hoặc bảng Cài Đặt.
-  - **Tự động nhớ chế độ cho từng ứng dụng (Per-App Mode Memory)**: Tự động bật Preedit khi bạn lướt web hay chat (`Chrome`, `Firefox`, `Slack`, `Discord`), và tự trả về Direct ngay khi bạn quay lại Terminal hay IDE.
+- **Chế độ Gõ Trực Tiếp (Direct Mode - Khuyên dùng cho Coding/Terminal/Editor)**:
+  - Sử dụng thuật toán Micro-diff: phát phím Backspace giả lập và commit phần đuôi biến đổi ngay tức thì.
+  - Tối ưu cho độ trễ cực thấp (gần như bằng $0$), mang lại cảm giác gõ mộc tự nhiên trên các editor chuyên nghiệp (Neovim, VS Code, Cursor, Zed, Alacritty, Kitty).
+- **Chế độ Gõ Gạch Chân (Preedit Mode - Khuyên dùng cho Web/Google Docs/Chat)**:
+  - Khắc phục tận gốc nguyên nhân gây lặp chữ: **Tuyệt đối không phát phím Backspace giả lập ra ứng dụng bên ngoài**.
+  - Từ đang soạn được hiển thị bằng nét gạch chân nội dòng (`setClientPreedit`) và được cam kết nguyên tử một lần duy nhất (`commitString`) khi người dùng bấm phím cách (Space), Enter hoặc dấu phân cách.
+  - **Khung chữ nổi (Floating Preedit Tooltip)**: Hiển thị từ đang gõ trong một ô nổi nhỏ ngay sát con trỏ chuột cho các ứng dụng tự vẽ Canvas như Google Docs (nơi trình duyệt không vẽ được nét gạch chân nội dòng). Đi kèm tùy chọn bật/tắt nhanh trên Menu hoặc Cài Đặt nếu người dùng muốn tránh phân tâm.
+  - **Tự động nhớ chế độ theo từng ứng dụng (Per-App Mode Memory)**: Tự động kích hoạt Preedit cho các trình duyệt web (`Chrome`, `Firefox`, `Brave`, `Edge`) và ứng dụng chat Electron (`Slack`, `Discord`, `Telegram`), đồng thời tự bật Direct khi quay lại Terminal/IDE.
 
 ---
 
-### 3.3. Tách Âm Tiết Cuối, VNI Numeric Guard & Khoảng Lặng Ngắt Từ (Dành Riêng Cho Anh Em Neovim / Terminal)
-Một vấn đề rất khó chịu trên terminal emulator là các phím lệnh Normal mode (như `ci"`, `cw`, `i`, `a`, `jk`, `u`) hoặc các chuỗi số đứng sát trước con trỏ dễ bị kẹt lại trong bộ đệm từ, làm nhảy chữ lung tung (chẳng hạn vừa gõ `height="50"` rồi bấm thêm `1` thì bị biến thành `heigh="úi"`):
-- **Bóc tách âm tiết cuối thông minh**:
-  - Khi gõ chuỗi phím số VNI (như `biet61`), bộ gõ tự động tách riêng âm tiết Tiếng Việt hợp lệ đứng cuối (`biet`) để bỏ dấu thành `biết`.
-  - Giữ nguyên vẹn toàn bộ đoạn văn bản phía trước, gõ thoải mái ngay cả khi con trỏ nằm sát dấu ngoặc kép `""` hay sau các phím lệnh vim.
+### 3.3. Tách Âm Tiết Cuối, VNI Numeric Guard & Khoảng Lặng Ngắt Từ (Đặc Trị Neovim / Terminal)
+Một vấn đề cố hữu của các bộ gõ trên terminal emulator là các phím lệnh Normal mode (như `ci"`, `cw`, `i`, `a`, `jk`, `u`) hoặc các chuỗi số đứng sát trước con trỏ dễ bị kẹt trong bộ đệm từ, gây hiện tượng đột biến chữ (ví dụ gõ `1` sau `height="50"` bị biến thành `heigh="úi"`):
+- **Giải pháp bóc tách âm tiết cuối**: Tích hợp hàm `extract_last_syllable_index()`:
+  - Khi gõ chuỗi phím số VNI (như `biet61`), engine tự động bóc tách âm tiết Tiếng Việt hợp lệ đứng cuối cùng (`biet`) để áp dụng dấu thành `biết`.
+  - Giữ nguyên vẹn văn bản đứng trước, gõ mượt mà ngay cả khi con trỏ đứng sát dấu ngoặc kép `""` hoặc sau các lệnh vim.
   - Tự động khóa khôi phục Tiếng Anh đối với từ gõ phím số VNI khi thoát Insert mode bằng phím tắt `jk`.
 - **Bảo vệ Chuỗi Số VNI (VNI Numeric Guard)**:
-  - Khi dùng kiểu gõ VNI, các chuỗi số liên tiếp (`501`, `12345`, `width="100"`) luôn được giữ nguyên định dạng số nguyên bản, không bao giờ bị biến nhầm thành dấu thanh hay phát phím Backspace làm hỏng code của bạn.
+  - Trong kiểu gõ VNI, các chuỗi số liên tiếp (`501`, `12345`, `width="100"`) được engine bảo đảm giữ nguyên định dạng số tự nhiên nguyên bản (literal digits), tuyệt đối không tự động biến âm thành dấu thanh hay phát xung Backspace làm xáo trộn code.
 - **Khoảng Lặng Ngắt Từ Tự Động (Keystroke Idle Timeout)**:
-  - Mặc định được để là `0ms` (tắt) trên cả 3 hệ điều hành. Nhờ vậy, khi bạn gõ chậm, dừng tay vài giây suy nghĩ hay tìm phím số VNI (như gõ `tieng` rồi đợi một lúc mới bấm `16` $\to$ `tiếng`), bộ đệm vẫn kiên nhẫn đợi bạn chứ không tự động dọn sạch ngang chừng.
-  - Nếu dùng Neovim, bạn nên kết hợp với module Lua chính thức (`vncharkey.lua`) đi kèm để tự động tắt/bật bộ gõ khi ra vào Insert mode cực kỳ mượt mà. Tất nhiên bạn vẫn có thể chỉnh lại timeout (từ 0 đến 2000ms) trong Settings nếu quen kiểu cũ.
+  - Mặc định được đặt là `0ms` (tắt) trên cả 3 hệ điều hành, đảm bảo khi người dùng gõ chậm, dừng tay suy nghĩ hay tìm phím số VNI (như gõ `tieng` rồi đợi vài giây mới gõ `16` -> `tiếng`, hoặc flip word) thì bộ đệm không bao giờ bị dọn ngang chừng.
+  - Người dùng Neovim được khuyến nghị sử dụng cơ chế IPC socket / module Lua chính thức (`vncharkey.lua`) để tự động chuyển trạng thái bật/tắt khi ra vào Insert mode vừa nhẹ nhàng vừa chuẩn xác tuyệt đối. Ngoài ra người dùng vẫn có thể tuỳ chỉnh thời gian timeout (từ 0 đến 2000ms) trong bảng Settings nếu muốn.
 - **Module Tích Hợp Sẵn Cho Neovim (`vncharkey.lua`)**:
-  - Đã có sẵn file cấu hình tại `data/neovim/lua/vncharkey.lua` (tự động copy vào `/usr/share/nvim/runtime/lua/vncharkey.lua`).
-  - Hỗ trợ cơ chế **One-time Load Guard** (tránh nạp trùng lặp), đổi trạng thái IME bất đồng bộ qua `vim.uv.spawn` với độ trễ bằng $0$, hỗ trợ sẵn phím thoát nhanh `jk` / `<Esc>`.
-  - Bạn chỉ cần thêm vào config Neovim:
+  - Gói sẵn module chính thức tại `data/neovim/lua/vncharkey.lua` (tự động cài vô `/usr/share/nvim/runtime/lua/vncharkey.lua`).
+  - Hỗ trợ cơ chế **One-time Load Guard** (ngăn chặn duplicate load), chuyển đổi IME bất đồng bộ qua `vim.uv.spawn` với độ trễ bằng $0$, và hỗ trợ phím thoát siêu tốc `jk` / `<Esc>`.
+  - Cách dùng trong Neovim khi cần:
     ```vim
     :lua require('vncharkey').load()
     ```
+    *(Module sẽ kích hoạt ngay và hiển thị thông báo; nếu gõ lại lần 2 sẽ hiện cảnh báo đã nạp rồi).*
 
 ---
 
@@ -257,40 +260,40 @@ Chắt lọc và nâng cấp từ thuật toán hoán đổi dấu phụ của *
 ---
 
 ### 3.12. Tổ Hợp Phím Tắt Thông Minh & Hệ Thống "Cứu Chữ / Cứu Dấu"
-- **Lật từ tức thì (`Ctrl + Shift + Z` / Tự do gán phím — Flip Word)**:
-  - Đảo qua đảo lại trạng thái của từ đang gõ giữa Tiếng Việt và phím thô (`thể` $\longleftrightarrow$ `theer`, `việt` $\longleftrightarrow$ `vieetj`).
-  - **Không tranh giành phím Redo của Editor**: Tổ hợp phím chỉ hoạt động khi bạn vừa gõ xong một từ (`has_active_word()`). Nếu bạn không gõ gì, phím tắt vẫn được trả về cho VS Code hay trình duyệt thực hiện lệnh Redo như bình thường. Trên Windows, bạn có thể tự do đổi sang `Alt + X`, `Ctrl + Alt + Z` hay bất kỳ tổ hợp nào bạn thích.
-- **Hoàn nguyên từ thô bằng `Shift + Esc` & Giữ trọn vẹn phím `Esc` cho Neovim**:
-  - **Bấm `Esc` bình thường**: Giữ nguyên từ tiếng Việt vừa gõ, chốt từ và gửi thẳng lệnh `Esc` cho app — giúp anh em lập trình viên **thoát `INSERT` mode của Neovim ngay lập tức ở lần bấm đầu tiên** mà không bị nuốt phím hay nhảy chữ!
-  - **Bấm `Shift + Esc`**: Trả ngay từ đang gõ về dạng phím thô ban đầu (`tiếng` $\to$ `tieengs`) và tạm khoá biến âm tiếng Anh cho từ đó.
-- **Hồi sinh từ vừa gõ sau phím Space (`Backspace` — Reopen Word)**:
-  - Lỡ gõ `tiêng ` (quên bỏ dấu sắc) mà tay đã quen bấm `Space`? Đừng lo, chỉ cần nhấn `Backspace` một lần để xoá khoảng trắng rồi gõ tiếp phím `s` $\to$ từ sẽ tự động sống lại và biến thành `tiếng` mà không cần phải xoá hết gõ lại từ đầu!
-- **Cứu Chữ & Cứu Dấu (Lấy cảm hứng từ Ngó Sen)**:
-  - **Tự động Cứu Chữ khi bật bộ gõ**: Nếu bạn lỡ quên bật bộ gõ mà gõ xong cả câu tiếng Anh thô dạng telex (`chaof banj, tieengs vieetj`), bạn chỉ cần bấm phím bật VnCharKey — cả câu sẽ được "phù phép" thành ngay **`chào bạn, tiếng việt`**! (Nếu muốn quay lại chữ thô, chỉ cần bấm `Backspace` hoặc `Esc` ngay sau đó).
-  - **Cứu Dấu khi bôi đen từ**: Bạn chỉ cần lấy chuột hoặc phím bôi đen một từ bất kỳ (ví dụ `tiêng`) rồi bấm phím dấu (`s` hoặc `1`), từ đó sẽ lập tức được gắn dấu thành **`tiếng`**.
-- **Tự động né từ khóa lập trình (Developer Code Auto-Bypass)**:
-  - Tự động nhận diện và không can thiệp vào các định danh trong code: biến bắt đầu bằng dấu gạch dưới (`_variable`, `__init__`), chuỗi `snake_case` (`user_id`, `parse_string`), chuỗi gọi thuộc tính (`db.collection.findOne`), hay `camelCase` / `PascalCase` (`useState`, `ClassName`).
-- **Hỗ trợ bảng mã Unicode Tổ Hợp (NFD)**:
-  - Dễ dàng chuyển đổi qua lại giữa **Unicode Dựng Sẵn (NFC)** và **Unicode Tổ Hợp (NFD)** ngay trong bảng Cài Đặt khi cần làm việc với một số phần mềm đồ hoạ cũ trên Linux.
+- **Lật Từ Tức Thì (`Ctrl + Shift + Z` / Tùy chỉnh tự do — Flip Word)**:
+  - Đảo ngược qua lại trạng thái của từ đang gõ giữa Tiếng Việt và chuỗi phím thô (`thể` $\longleftrightarrow$ `theer`, `việt` $\longleftrightarrow$ `vieetj`).
+  - **Không xung đột với phím tắt Redo của Editor**: Tổ hợp phím chỉ bắt sự kiện khi trong bộ đệm đang thực sự có từ vừa gõ (`has_active_word()`). Khi bộ đệm đang rỗng, phím tắt được trả thẳng về cho ứng dụng (VS Code, trình duyệt...) thực hiện lệnh Redo bình thường. Trên Windows, người dùng có thể tự do đổi sang `Alt + X`, `Ctrl + Alt + Z` hoặc thu phím bất kỳ.
+- **Hoàn Nguyên Từ Thô Bằng `Shift + Esc` & Bảo Toàn `Esc` Cho Neovim**:
+  - **Nhấn `Esc` đơn thuần**: Giữ nguyên từ tiếng Việt vừa gõ, chốt bộ đệm và truyền thẳng `Esc` cho ứng dụng — giúp lập trình viên **thoát `INSERT` mode của Neovim ngay lập tức ở lần bấm đầu tiên** mà không bị mất dấu hay biến dạng chữ!
+  - **Nhấn `Shift + Esc`**: Hoàn nguyên ngay lập tức từ đang gõ về chuỗi phím thô (`tiếng` $\to$ `tieengs`) và tạm khóa tiếng Anh cho từ đó.
+- **Hồi Sinh Từ Trước Sau Phím Space (`Backspace` — Reopen Word)**:
+  - Lỡ gõ `tiêng ` (quên bỏ dấu sắc) rồi đã bấm `Space`? Chỉ cần bấm `Backspace` một lần để xóa dấu cách rồi gõ luôn phím `s` $\to$ từ tự động hồi sinh và biến thành `tiếng` mà không cần xóa cả chữ!
+- **Cứu Chữ & Cứu Dấu Kiểu Ngó Sen (Word & Accent Rescue)**:
+  - **Cứu Chữ tự động khi bật bộ gõ**: Nếu bạn quên bật bộ gõ và lỡ gõ cả câu tiếng Anh thô (`chaof banj, tieengs vieetj`), chỉ cần bấm phím chuyển sang VnCharKey — toàn bộ câu vừa gõ sẽ tự động hóa phép thành **`chào bạn, tiếng việt`**! (Nhấn `Backspace` hoặc `Esc` ngay sau đó nếu muốn hoàn tác về chữ thô).
+  - **Cứu Dấu khi bôi đen từ**: Dùng chuột hoặc bàn phím bôi đen một từ bất kỳ (ví dụ `tiêng`) rồi bấm phím dấu (`s` hoặc `1`), từ đang bôi đen sẽ lập tức biến thành **`tiếng`**.
+- **Tự Động Bỏ Qua Ký Tự Lập Trình (Developer Code Auto-Bypass)**:
+  - Tự động nhận diện và khóa tiếng Anh cho các định danh mã nguồn: biến bắt đầu bằng gạch dưới (`_variable`, `__init__`), chuỗi `snake_case` (`user_id`, `parse_string`), chuỗi truy cập thuộc tính qua dấu chấm (`db.collection.findOne`), và `camelCase` / `PascalCase` (`useState`, `ClassName`).
+- **Hỗ Trợ Bảng Mã Unicode Tổ Hợp (NFD Composite Charset)**:
+  - Cho phép chuyển đổi linh hoạt giữa **Unicode Dựng Sẵn (NFC)** và **Unicode Tổ Hợp (NFD)** ngay trong bảng Cài Đặt để tương thích tuyệt đối với các phần mềm đồ họa XWayland đặc thù.
 
 ---
 
-### 3.13. Tự Động Học Thói Quen Gõ & Đưa Vào Whitelist (Adaptive Habit Learner)
-Bộ gõ tích hợp cơ chế tự học thích nghi cục bộ (`habit_learner.rs`) nhẹ nhàng ngay trong lõi `vncharkey-core` cho cả Linux, Windows và macOS:
-- **Nhận diện 4 thói quen sửa lỗi quen thuộc của bạn**:
-  1. **Xoá bằng `Backspace` rồi gõ lại chữ không dấu**: Khi bị bỏ dấu nhầm, bạn bấm `Backspace` xoá đi rồi gõ lại từ không dấu.
-  2. **Gõ đúp phím dấu để xoá dấu**: Gõ `ss`, `ff`, `rr`, `ww`... để đưa từ về dạng chữ ASCII.
-  3. **Dùng phím Lật Từ (`FlipToRaw`)**: Bấm `Ctrl + Shift + Z` / `Alt + X` để trả chữ tiếng Việt về phím thô.
-  4. **Dùng phím Hoàn Nguyên (`EscapeToRaw`)**: Bấm `Shift + Esc` để huỷ dấu vừa gõ.
-- **Hoàn toàn tự do bật/tắt & Tự chỉnh ngưỡng học**:
-  - Bạn có thể **bật hoặc tắt hẳn** tính năng này trong Cài Đặt nếu thích cảm giác gõ cố định, không muốn bộ gõ tự ý ghi nhớ.
-  - Ngưỡng sửa/xoá mặc định là **4 lần** (tránh tình trạng vừa gõ nhầm 1-2 lần đã vội học nhầm), và bạn có thể tự chỉnh ngưỡng này từ 2 đến 10 lần tuỳ ý.
-- **Tự động lưu vào Từ Điển Cá Nhân & Phục hồi cực nhanh**:
-  - Những từ học được sẽ tự động thêm vào tệp **Từ Điển Cá Nhân** (`vncharkey-dictionary.conf` / `dictionary.conf`).
-  - Nếu chẳng may bộ gõ lỡ "học nhầm" một từ tiếng Việt nào đó, bạn chỉ cần mở tab **Dictionary** trong GUI hoặc mở file từ điển lên và **xoá từ đó đi** — bộ gõ sẽ lập tức "quên" ngay và cho phép bạn gõ dấu bình thường trở lại.
-- **Bảo mật và an toàn**:
-  - Bộ nhớ nhật ký thói quen hỗ trợ tối đa **100 MB** với cơ chế xoay vòng tự động (giữ lại 70% dữ liệu gần nhất khi đầy).
-  - Bộ gõ chỉ ghi nhận các từ ngữ dạng chữ cái thông thường (2–32 ký tự), tuyệt đối **không ghi nhận chuỗi số, mã PIN hay mật khẩu**.
+### 3.13. Tự Động Học Thói Quen Gõ & Đưa Vào Whitelist (Adaptive Habit Learner — Tự Do Cấu Hình)
+Tích hợp bộ máy học thích nghi cục bộ (`habit_learner.rs`) ngay trong lõi `vncharkey-core` cho cả 3 hệ điều hành (Linux, Windows, macOS):
+- **Tự động phát hiện 4 hành vi sửa lỗi của người dùng**:
+  1. **Xóa bằng `Backspace` rồi gõ lại chữ không dấu (`BackspaceRetype`)**: Khi một từ bị bỏ dấu nhầm, người dùng bấm `Backspace` xóa đi rồi gõ lại từ nguyên bản.
+  2. **Nhấn đúp phím dấu để khử dấu (`DoubleKeyUndo`)**: Gõ `ss`, `ff`, `rr`, `ww`... để hoàn tác dấu thanh/dấu mũ về chữ ASCII.
+  3. **Bấm phím Lật Từ (`FlipToRaw`)**: Dùng `Ctrl + Shift + Z` / `Alt + X` để trả từ tiếng Việt về chuỗi phím gốc.
+  4. **Bấm phím Hoàn Nguyên (`EscapeToRaw`)**: Dùng `Esc` / `Shift + Esc` để hủy bỏ dấu vừa gõ.
+- **Tự Do Bật/Tắt & Toàn Quyền Đặt Ngưỡng Học (Custom Promotion Threshold)**:
+  - Cho phép người dùng **bật hoặc tắt hoàn toàn** tính năng tự học nếu không muốn bộ gõ tự ý thay đổi hành vi.
+  - Ngưỡng sửa/xóa mặc định được nâng lên **4 lần** (thay vì 2 lần dễ bị tai nạn khi gõ nhầm thao tác nhanh), đồng thời người dùng có thể tùy chỉnh tự do ngưỡng này (từ 2 đến 10 lần trên Linux/Windows/macOS).
+- **Tự động đưa vào Từ Điển Cá Nhân & Phục Hồi Tức Thì (Instant Unlearn)**:
+  - Từ được học sẽ tự động được ghi nối vào tệp **Từ Điển Cá Nhân** (`vncharkey-dictionary.conf` / `dictionary.conf`).
+  - Nếu lỡ bị "tai nạn" học nhầm từ tiếng Việt, người dùng chỉ cần mở tab **Dictionary** trên GUI hoặc chỉnh sửa file từ điển để **xóa từ đó đi** — bộ gõ sẽ lập tức unlearn và phục hồi khả năng gõ dấu tiếng Việt bình thường ngay tức khắc!
+- **Nhật ký thói quen dung lượng cao (100 MB FIFO Rotation) & Bảo mật tuyệt đối**:
+  - Hỗ trợ lưu lịch sử học tập lên tới **100 MB** (`vncharkey-habit.log` / `habit.log`), tự động xoay vòng FIFO giữ lại 70% dữ liệu mới nhất khi đầy.
+  - Chỉ ghi nhận các từ chữ cái đơn thuần (2–32 ký tự), tuyệt đối không ghi nhận chuỗi số, mã PIN hay mật khẩu.
 
 ---
 
@@ -417,25 +420,25 @@ Phiên bản dành cho Windows sử dụng tên gọi trung tính **VnCharKey** 
 
 ---
 
-## 7. Ý Nghĩa Biểu Tượng & Thiết Kế
+## 7. Ý Nghĩa Biểu Tượng & Di Sản Tự Do
 
-Biểu tượng của **VnCharKey** mang tinh thần kết nối giữa nét đẹp truyền thống và hơi thở công nghệ hiện đại:
-1. **Hình Tượng Nón Lá & Chữ V Cách Điệu**:
-   - Lấy cảm hứng từ chiếc nón lá Việt Nam thân thương đan cài khéo léo cùng nét chữ **`V`** hiện đại, thanh thoát.
-   - Được thể hiện theo phong cách phím cơ (keycap) 3D nổi khối với nền trong suốt (transparent) và 4 góc bo cong mềm mại. Dù đặt trên Waybar, Swaybar, khay hệ thống KDE/GNOME hay Taskbar Windows và Menu Bar macOS (từ 16px nhỏ nhắn đến HiDPI 256px), icon vẫn hiển thị gọn gàng, sáng rõ và sắc nét.
-2. **Ký Tự `V` Thân Thuộc**:
-   - Tâm điểm chữ **`V`** vừa gợi nhắc về đất nước **Việt Nam**, vừa là phím tắt kích hoạt bộ gõ **V-Key**, đồng thời tôn vinh vẻ đẹp của chữ quốc ngữ trong kỷ nguyên số — nhanh, chuẩn và liền mạch.
+Huy hiệu của **VnCharKey** kết hợp hai yếu tố văn hóa và công nghệ:
+1. **Khối Keycap Cơ 3D Cờ Vàng Ba Sọc Đỏ (Hoàng Long & Ba Sọc Đỏ)**:
+   - Thiết kế keycap cơ 3D nổi khối với nền trong suốt (transparent background), 4 góc vát cong tự nhiên chuẩn công thái học (ergonomic keycap profile). Khi đặt lên thanh Waybar, Swaybar hay khay hệ thống KDE/GNOME (16px, 22px, 24px đến HiDPI 256px), biểu tượng hiển thị nổi bật, sáng rõ và sắc nét tuyệt đối.
+   - Nền vàng rực rỡ và ba sọc đỏ tượng trưng cho ba miền Bắc — Trung — Nam gắn bó keo sơn, gắn liền với di sản tinh thần **Tự Do — Dân Chủ — Phú Cường**.
+2. **Ký Tự `V` Khắc Chìm Trung Tâm (Việt Nam & V-Key)**:
+   - Ký tự `V` sắc sảo nằm ngay tâm phím mang ý nghĩa kép: đại diện cho chữ cái thiêng liêng **Việt Nam**, phím tắt bộ gõ **Vietnamese Key**, và biểu tượng chiến thắng tinh thần Tự Do.
 
 ---
 
-## 8. Lời Cảm Ơn & Ghi Chú Phát Triển
+## 8. Lời Cảm Ơn / Ghi Chú Phát Triển
 
-- Dự án được hoàn thiện với sự đồng hành của **Google Gemini** trong việc hỗ trợ tối ưu kiến trúc, kiểm thử tự động và rà soát các trường hợp biên.
-- Gửi lời cảm ơn chân thành đến cộng đồng phát triển [Fcitx5](https://github.com/fcitx/fcitx5) cùng các tác giả của những bộ gõ Tiếng Việt mã nguồn mở đi trước đã truyền nhiều cảm hứng quý báu cho dự án.
+- Dự án được xây dựng và tối ưu hoá với sự đồng hành của **Google Gemini** trong vai trò AI pair programmer (hỗ trợ phân tích kiến trúc, gỡ lỗi và kiểm thử tự động).
+- Chân thành cảm các developers của dự án [Fcitx5](https://github.com/fcitx/fcitx5) và các bộ gõ Tiếng Việt đi trước.
 
 ---
 
 ## 9. Bản Quyền & Giấy Phép
 
-- Bộ gõ phát hành hoàn toàn miễn phí và mở theo giấy phép [GNU General Public License v3.0 (GPLv3)](LICENSE).
-- Mọi ý kiến đóng góp, chia sẻ trải nghiệm hoặc báo lỗi, mời bạn ghé thăm: [GitHub Repository](https://github.com/no-vici/fcitx5-vncharkey).
+- Dự án được phát hành dưới hình thức **Mã Nguồn Mở Tự Do 100%** theo các điều khoản của [Giấy Phép GNU General Public License v3.0 (GPLv3)](LICENSE).
+- Mọi đóng góp, báo cáo lỗi và thảo luận xin gởi về: [GitHub Repository](https://github.com/no-vici/fcitx5-vncharkey).
