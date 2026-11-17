@@ -6,7 +6,7 @@
 
 **Bộ gõ Tiếng Việt mượt mà, gõ sướng tay cho Linux, macOS & Windows**  
 *Viết bằng Rust kết hợp Native C++ Fcitx5 Module & Cocoa / Win32.*  
-*Học hỏi và gom nhặt tinh hoa từ **OpenViet IME**, **OpenKey**, **GoNhanh**, **VietC** cùng thuật toán Micro-diff từ **Lilypad**.*  
+*Học hỏi và lượm lặt tinh hoa từ **OpenViet IME**, **OpenKey**, **GoNhanh**, **VietC** cùng thuật toán Micro-diff từ **Lilypad**.*  
 *Biểu tượng hài hòa giữa hình tượng Nón Lá truyền thống và chữ V mang phong cách hiện đại.*
 
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-orange.svg?style=flat-square&logo=rust)](https://www.rust-lang.org)

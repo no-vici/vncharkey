@@ -13,7 +13,7 @@ Tất cả những thay đổi nổi bật của dự án **VnCharKey** (**fcitx
   - Tự động nhận diện ngữ cảnh: chuyển đổi từ đang gõ dở trong bộ đệm (`has_active_word()`) hoặc đoạn văn bản được bôi đen bằng chuột/bàn phím qua `surroundingText().selectedText()`.
 - **Đồng Bộ Bộ Gõ Không Độ Trễ Cho Neovim / Terminal Qua Unix Domain Socket IPC Trên Linux**:
   - Tích hợp listener Unix Domain Socket non-blocking tại `/tmp/vncharkey.sock` trực tiếp vào Event Loop của Fcitx5 (`fcitx::EventSourceIO`), siết quyền bảo mật cục bộ `0600`.
-  - Phục vụ module Neovim ([data/neovim/lua/vncharkey.lua](file:///home/codegpt/antigravity/VnCharKey/data/neovim/lua/vncharkey.lua)) chuyển đổi chế độ gõ tức thì ($< 2\text{ ms}$) qua `vim.uv.new_pipe()` mà không làm mất biểu tượng VnCharKey trên khay hệ thống, không trôi phím chế độ Normal.
+  - Phục vụ module Neovim ([data/neovim/lua/vncharkey.lua](file:///home/codegpt/antigravity/VnCharKey/data/neovim/lua/vncharkey.lua)) chuyển đổi chế độ gõ tức thì ($< 2\text{ ms}$) qua `vim.uv.new_pipe()` mà không làm mất biểu tượng cờ vàng trên khay hệ thống, không trôi phím chế độ Normal.
 - **Bảo Vệ Chuỗi Mã Hóa & Token Kỹ Thuật (Technical Token Protection)**:
   - Tự động phát hiện và khóa tiếng Anh (`english_locked = true`) cho mã màu CSS Hex (`#f97316`, `#ef4444`), đơn vị đo lường lập trình (`10px`, `2rem`, `50vh`, `100vw`), và định danh kỹ thuật pha trộn chữ - số (`v1s`, `sha256`, `utf8`, `x86_64`).
 - **Thanh Tra Thói Quen Gõ Trực Quan (Habit Inspector GUI)**:

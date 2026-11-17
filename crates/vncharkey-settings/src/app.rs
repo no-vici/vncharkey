@@ -2013,7 +2013,7 @@ impl SettingsApp {
             if let Some(tex) = &self.logo_texture {
                 ui.add(egui::Image::new(tex).fit_to_exact_size(egui::vec2(80.0, 80.0)));
             } else {
-                // Fallback to VnCharKey icon representation
+                // Fallback to Cờ Vàng Ba Sọc Đỏ icon representation
                 ui.label(
                     egui::RichText::new("🟡")
                         .size(64.0)
@@ -2057,10 +2057,10 @@ impl SettingsApp {
 
             // Link
             ui.hyperlink_to(
-                egui::RichText::new("https://github.com/no-vici/fcitx5-vncharkey")
+                egui::RichText::new("https://github.com/no-vici/vncharkey")
                     .size(13.0)
                     .color(egui::Color32::from_rgb(0x89, 0xb4, 0xfa)),
-                "https://github.com/no-vici/fcitx5-vncharkey",
+                "https://github.com/no-vici/vncharkey",
             );
             ui.add_space(16.0);
 
@@ -2068,11 +2068,11 @@ impl SettingsApp {
             ui.horizontal(|ui| {
                 ui.add_space((ui.available_width() - 415.0).max(0.0) / 2.0);
                 if ui.add(egui::Button::new("Report Bug").min_size(egui::vec2(200.0, 32.0))).clicked() {
-                    let _ = Command::new("xdg-open").arg("https://github.com/no-vici/fcitx5-vncharkey/issues/new").spawn();
+                    let _ = Command::new("xdg-open").arg("https://github.com/no-vici/vncharkey/issues/new").spawn();
                 }
                 ui.add_space(15.0);
                 if ui.add(egui::Button::new("Request Feature").min_size(egui::vec2(200.0, 32.0))).clicked() {
-                    let _ = Command::new("xdg-open").arg("https://github.com/no-vici/fcitx5-vncharkey/issues/new").spawn();
+                    let _ = Command::new("xdg-open").arg("https://github.com/no-vici/vncharkey/issues/new").spawn();
                 }
             });
             ui.add_space(10.0);
@@ -2110,7 +2110,7 @@ impl SettingsApp {
                 egui::RichText::new("VnCharKey Engine (100% Safe Rust Core)")
                     .size(13.0)
                     .color(egui::Color32::from_rgb(0xb4, 0xbe, 0xfe)),
-                "https://github.com/no-vici/fcitx5-vncharkey",
+                "https://github.com/no-vici/vncharkey",
             );
 
             ui.add_space(16.0);

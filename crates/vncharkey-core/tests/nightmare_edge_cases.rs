@@ -407,7 +407,7 @@ let code_cases = [
 ("md5 ", "md5 "),
 ("utf8 ", "utf8 "),
 // URL, Email, Path & CLI flags
-("https://github.com/no-vici/fcitx5-vncharkey ", "https://github.com/no-vici/fcitx5-vncharkey "),
+("https://github.com/no-vici/vncharkey ", "https://github.com/no-vici/vncharkey "),
 ("user@domain.com ", "user@domain.com "),
 ("./src/engine.rs ", "./src/engine.rs "),
 ("--enable-wayland-ime ", "--enable-wayland-ime "),

@@ -15,7 +15,7 @@ version = "0.3.6"
 authors = ["VnCharKey Contributors <freedom@vncharkey.org>"]
 edition = "2021"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/no-vici/fcitx5-vncharkey"
+repository = "https://github.com/no-vici/vncharkey"
 description = "High-performance, memory-safe Vietnamese input engine for Linux (VnCharKey / Fcitx5 / Wayland / X11)"
 
 [profile.release]

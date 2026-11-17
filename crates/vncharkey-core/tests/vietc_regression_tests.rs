@@ -525,7 +525,7 @@ fn test_nightmare_sloppy_typing_and_bilingual_edge_cases() {
         ("_variable ", "_variable "),
         ("init ", "init "),
         ("db.collection.findOne ", "db.collection.findOne "),
-        ("https://github.com/no-vici/fcitx5-vncharkey ", "https://github.com/no-vici/fcitx5-vncharkey "),
+        ("https://github.com/no-vici/vncharkey ", "https://github.com/no-vici/vncharkey "),
         ("user@domain.com ", "user@domain.com "),
         ("./src/engine.rs ", "./src/engine.rs "),
         ("--enable-wayland-ime ", "--enable-wayland-ime "),

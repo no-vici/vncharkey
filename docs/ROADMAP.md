@@ -144,6 +144,6 @@
 ## 🤝 Đóng Góp & Góp Ý (Contributing)
 
 Mọi ý tưởng đóng góp, phản hồi trải nghiệm gõ hoặc đề xuất tính năng mới đều được hoan nghênh nồng nhiệt!
-- **Báo lỗi & Thảo luận**: Mở Issue hoặc Pull Request tại [GitHub Repository](https://github.com/no-vici/fcitx5-vncharkey).
+- **Báo lỗi & Thảo luận**: Mở Issue hoặc Pull Request tại [GitHub Repository](https://github.com/no-vici/vncharkey).
 - **Mã nguồn**: Tuân thủ giấy phép tự do **GNU GPLv3**.
 

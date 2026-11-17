@@ -76,7 +76,7 @@ Depends: fcitx5, libc6 (>= 2.31), libstdc++6 (>= 10)
 Recommends: fcitx5-config-qt
 Suggests: neovim
 Maintainer: no-vici <no-vici@users.noreply.github.com>
-Homepage: https://github.com/no-vici/fcitx5-vncharkey
+Homepage: https://github.com/no-vici/vncharkey
 Description: High-performance memory-safe Vietnamese input engine for Fcitx5
  VnCharKey (Tự Do Edition) is a next-generation Vietnamese input engine
  written in 100% Safe Rust for Linux Fcitx5, Wayland, and X11.

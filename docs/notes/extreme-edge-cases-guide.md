@@ -481,7 +481,7 @@ let code_cases = [
 ("init ", "init "),
 ("db.collection.findOne ", "db.collection.findOne "),
 // URL, Email, Path & CLI flags
-("https://github.com/no-vici/fcitx5-vncharkey ", "https://github.com/no-vici/fcitx5-vncharkey "),
+("https://github.com/no-vici/vncharkey ", "https://github.com/no-vici/vncharkey "),
 ("user@domain.com ", "user@domain.com "),
 ("./src/engine.rs ", "./src/engine.rs "),
 ("--enable-wayland-ime ", "--enable-wayland-ime "),

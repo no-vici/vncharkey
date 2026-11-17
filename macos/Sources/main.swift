@@ -1575,7 +1575,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         • 100% Offline, bảo mật cao và không gởi bất kỳ dữ liệu nào ra khỏi máy người dùng
         • Tự động khôi phục Tiếng Anh, Smart Casing, hồi sinh từ
 
-        Mã nguồn: https://github.com/no-vici/fcitx5-vncharkey
+        Mã nguồn: https://github.com/no-vici/vncharkey
         Giấy phép: GNU General Public License v3.0 (GPLv3)
         """
         if let iconPath = Bundle.main.path(forResource: "AppIcon", ofType: "png"),
@@ -1591,7 +1591,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Kiểm tra bản mới
             checkForUpdates(silentIfLatest: false)
         } else if resp == .alertThirdButtonReturn {
-            if let url = URL(string: "https://github.com/no-vici/fcitx5-vncharkey/releases") {
+            if let url = URL(string: "https://github.com/no-vici/vncharkey/releases") {
                 NSWorkspace.shared.open(url)
             }
         }
@@ -1602,7 +1602,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func checkForUpdates(silentIfLatest: Bool) {
-        guard let url = URL(string: "https://api.github.com/repos/no-vici/fcitx5-vncharkey/releases/latest") else { return }
+        guard let url = URL(string: "https://api.github.com/repos/no-vici/vncharkey/releases/latest") else { return }
         var request = URLRequest(url: url)
         request.setValue("VnCharKey-AutoUpdater", forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 10.0
@@ -1630,7 +1630,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             }
                         }
                         if dmgDownloadUrl == nil {
-                            dmgDownloadUrl = "https://github.com/no-vici/fcitx5-vncharkey/releases/download/\(tagName)/VnCharKey-\(cleanLatest).dmg"
+                            dmgDownloadUrl = "https://github.com/no-vici/vncharkey/releases/download/\(tagName)/VnCharKey-\(cleanLatest).dmg"
                         }
 
                         let alert = NSAlert()
@@ -1682,7 +1682,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     errAlert.addButton(withTitle: "Mở GitHub")
                     errAlert.addButton(withTitle: "Đóng")
                     if errAlert.runModal() == .alertFirstButtonReturn {
-                        if let u = URL(string: "https://github.com/no-vici/fcitx5-vncharkey/releases") {
+                        if let u = URL(string: "https://github.com/no-vici/vncharkey/releases") {
                             NSWorkspace.shared.open(u)
                         }
                     }

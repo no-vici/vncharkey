@@ -69,7 +69,7 @@ brew upgrade vncharkey
 ### Bước 1: Build ứng dụng từ mã nguồn
 
 ```bash
-git clone https://github.com/no-vici/fcitx5-vncharkey.git
+git clone https://github.com/no-vici/vncharkey.git
 cd fcitx5-vncharkey/macos
 make clean && make app
 ```
@@ -96,7 +96,7 @@ open /Applications/VnCharKey.app
 - **Nếu cài lần đầu tiên**:
   1. Khi ứng dụng hiện thông báo cần quyền Trợ năng, bấm **Mở System Settings** (hoặc vào **System Settings > Privacy & Security > Accessibility**).
   2. Bật công tắc cho **VnCharKey**.
-  3. Bấm vào biểu tượng VnCharKey **`V`** trên thanh Menu Bar $\to$ chọn **Thoát VnCharKey**, sau đó mở lại `/Applications/VnCharKey.app`.
+  3. Bấm vào biểu tượng Cờ Vàng **`V`** trên thanh Menu Bar $\to$ chọn **Thoát VnCharKey**, sau đó mở lại `/Applications/VnCharKey.app`.
 
 - **Nếu bạn vừa Re-build / Update bản mới mà thấy không gõ được Tiếng Việt**:
   Do bản build mới có chữ ký ad-hoc mới, macOS TCC sẽ âm thầm chặn quyền của bản mới dù nút gạt trong System Settings nhìn vẫn đang bật! Cách xử lý chuẩn:

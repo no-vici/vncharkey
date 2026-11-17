@@ -4,13 +4,13 @@ pkgver=0.3.6.r1
 pkgrel=1
 pkgdesc="High-performance memory-safe Vietnamese input engine in 100% Rust for Fcitx5 (VnCharKey Tự Do Edition)"
 arch=('x86_64')
-url="https://github.com/no-vici/fcitx5-vncharkey"
+url="https://github.com/no-vici/vncharkey"
 license=('GPL-3.0-or-later')
 depends=('fcitx5')
 makedepends=('git' 'cargo' 'rust' 'cmake' 'extra-cmake-modules' 'gcc' 'ninja')
 provides=('fcitx5-vncharkey')
 conflicts=('fcitx5-vncharkey')
-source=("git+https://github.com/no-vici/fcitx5-vncharkey.git")
+source=("git+https://github.com/no-vici/vncharkey.git")
 md5sums=('SKIP')
 
 pkgver() {
