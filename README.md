@@ -1,4 +1,4 @@
-# VnCharKey (Tự Do Edition)
+# VnCharKey
 
 <div align="center">
 
@@ -7,7 +7,7 @@
 **Bộ Gõ Tiếng Việt Hiệu Năng Cao Cho Linux, macOS & Windows**  
 *Được phát triển bằng Rust kết hợp Native C++ Fcitx5 Module & Cocoa / Win32.*  
 *Hội tụ tinh hoa xử lý biến âm từ **OpenViet IME**, **OpenKey**, **GoNhanh**, **VietC** và thuật toán Micro-diff từ **Lilypad**.*  
-*Mang đậm tinh thần Tự Do và Di sản Cờ Vàng Ba Sọc Đỏ.*
+*Biểu tượng hài hòa giữa hình tượng Nón Lá truyền thống và chữ V mang phong cách hiện đại.*
 
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-orange.svg?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/License-GNU%20GPL%203.0-blue.svg?style=flat-square)](LICENSE)
@@ -420,14 +420,15 @@ Phiên bản dành cho Windows sử dụng tên gọi trung tính **VnCharKey** 
 
 ---
 
-## 7. Ý Nghĩa Biểu Tượng & Di Sản Tự Do
+## 7. Ý Nghĩa Biểu Tượng & Thiết Kế
 
-Huy hiệu của **VnCharKey** kết hợp hai yếu tố văn hóa và công nghệ:
-1. **Khối Keycap Cơ 3D Cờ Vàng Ba Sọc Đỏ (Hoàng Long & Ba Sọc Đỏ)**:
-   - Thiết kế keycap cơ 3D nổi khối với nền trong suốt (transparent background), 4 góc vát cong tự nhiên chuẩn công thái học (ergonomic keycap profile). Khi đặt lên thanh Waybar, Swaybar hay khay hệ thống KDE/GNOME (16px, 22px, 24px đến HiDPI 256px), biểu tượng hiển thị nổi bật, sáng rõ và sắc nét tuyệt đối.
-   - Nền vàng rực rỡ và ba sọc đỏ tượng trưng cho ba miền Bắc — Trung — Nam gắn bó keo sơn, gắn liền với di sản tinh thần **Tự Do — Dân Chủ — Phú Cường**.
-2. **Ký Tự `V` Khắc Chìm Trung Tâm (Việt Nam & V-Key)**:
-   - Ký tự `V` sắc sảo nằm ngay tâm phím mang ý nghĩa kép: đại diện cho chữ cái thiêng liêng **Việt Nam**, phím tắt bộ gõ **Vietnamese Key**, và biểu tượng chiến thắng tinh thần Tự Do.
+Huy hiệu của **VnCharKey** kết hợp hài hòa giữa bản sắc văn hóa dân tộc và hơi thở công nghệ hiện đại:
+1. **Sự Hài Hòa Giữa Nón Lá Truyền Thống và Chữ V Hiện Đại**:
+   - Biểu tượng lấy cảm hứng từ chiếc nón lá Việt Nam mộc mạc, gần gũi đan quyện cùng đường nét cách điệu chữ **`V`** mạnh mẽ, thanh thoát.
+   - Thiết kế dạng keycap cơ 3D nổi khối với nền trong suốt (transparent background), 4 góc vát cong tinh tế chuẩn công thái học. Khi đặt lên thanh Waybar, Swaybar, khay hệ thống KDE/GNOME hay Taskbar/Menu Bar (từ 16px, 22px, 24px đến HiDPI 256px), biểu tượng luôn hiển thị sáng rõ, sắc nét và hiện đại.
+2. **Ký Tự `V` Tinh Tế & Ý Nghĩa Kép**:
+   - Chữ **`V`** là tâm điểm biểu trưng cho **Việt Nam**, ngôn ngữ **Vietnamese**, và phím kích hoạt bộ gõ **V-Key**.
+   - Thể hiện sự tôn vinh tiếng Việt trong kỷ nguyên số, mang lại trải nghiệm nhập liệu tự do, tốc độ và liền mạch trên mọi nền tảng.
 
 ---
 
