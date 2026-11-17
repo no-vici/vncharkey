@@ -123,6 +123,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defaults.set(0, forKey: "vncharkey.charset")        // Unicode dựng sẵn NFC
             defaults.set(false, forKey: "vncharkey.bracket")    // Gõ [ ] thành ơ ư
             defaults.set(false, forKey: "vncharkey.caseAnchor") // Đồng nhất chữ hoa theo chữ cái đầu
+            defaults.set(false, forKey: "vncharkey.quick_telex") // Cho phép gõ nhanh phụ âm kép
+            defaults.set(false, forKey: "vncharkey.quick_start") // Phụ âm đầu nhanh
+            defaults.set(false, forKey: "vncharkey.quick_end")   // Phụ âm cuối nhanh
             defaults.set(0, forKey: "vncharkey.w2u")            // W -> ư (Không ở đầu từ)
             defaults.set(0, forKey: "vncharkey.idleTimeout")  // Mặc định tắt (0ms) để không ngắt gõ dấu VNI / flip word khi dừng tay
             defaults.set(true, forKey: "vncharkey.perApp")     // Mặc định nhớ trạng thái theo từng ứng dụng
@@ -495,6 +498,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         defaults.set(next, forKey: "vncharkey.quick_telex")
         km.setQuickTelex(next)
         rebuildMenu()
+        syncDashboardControls()
     }
 
     @objc func toggleQuickStart(_ sender: NSMenuItem) {
@@ -503,6 +507,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         defaults.set(next, forKey: "vncharkey.quick_start")
         km.setQuickStartConsonant(next)
         rebuildMenu()
+        syncDashboardControls()
     }
 
     @objc func toggleQuickEnd(_ sender: NSMenuItem) {
@@ -511,6 +516,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         defaults.set(next, forKey: "vncharkey.quick_end")
         km.setQuickEndConsonant(next)
         rebuildMenu()
+        syncDashboardControls()
     }
 
     @objc func selectMethod(_ sender: NSMenuItem) {
@@ -1565,7 +1571,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Phiên bản: v\(curVer) (Universal Binary: Apple Silicon & Intel)
 
         • Bộ gõ Tiếng Việt hiện đại và gọn nhẹ cho macOS
-        • Biểu Tượng Nón Lá Truyền Thống & Chữ V Hiện Đại
+        • Tinh Thần Tự Do và Di Sản Cờ Vàng Ba Sọc Đỏ
         • 100% Offline, bảo mật cao và không gởi bất kỳ dữ liệu nào ra khỏi máy người dùng
         • Tự động khôi phục Tiếng Anh, Smart Casing, hồi sinh từ
 
