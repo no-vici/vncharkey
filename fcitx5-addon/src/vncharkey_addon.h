@@ -77,6 +77,8 @@ extern "C" {
     int fcitx5_vncharkey_undo_escape(void* ctx, size_t* out_backspaces, char** out_commit);
     int fcitx5_vncharkey_rescue_sentence(void* ctx, const char* text, char** out_rescued);
     int fcitx5_vncharkey_apply_accent_to_selection(void* ctx, const char* selection, uint32_t ch, char** out_transformed);
+    int fcitx5_vncharkey_cycle_word_case(void* ctx, size_t* out_backspaces, char** out_commit);
+    int fcitx5_vncharkey_cycle_text_case(const char* text, char** out_cased);
     char* fcitx5_vncharkey_search_symbols(const char* query, uint32_t limit);
 }
 
