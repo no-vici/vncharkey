@@ -1550,7 +1550,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Phiên bản: v\(curVer) (Universal Binary: Apple Silicon & Intel)
 
         • Bộ gõ Tiếng Việt hiện đại và gọn nhẹ cho macOS
-        • Tinh Thần Tự Do và Di Sản Cờ Vàng Ba Sọc Đỏ
+        • Biểu Tượng Nón Lá Truyền Thống & Chữ V Hiện Đại
         • 100% Offline, bảo mật cao và không gởi bất kỳ dữ liệu nào ra khỏi máy người dùng
         • Tự động khôi phục Tiếng Anh, Smart Casing, hồi sinh từ
 

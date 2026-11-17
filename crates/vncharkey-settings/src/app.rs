@@ -2011,7 +2011,7 @@ impl SettingsApp {
             if let Some(tex) = &self.logo_texture {
                 ui.add(egui::Image::new(tex).fit_to_exact_size(egui::vec2(80.0, 80.0)));
             } else {
-                // Fallback to Cờ Vàng Ba Sọc Đỏ icon representation
+                // Fallback to VnCharKey icon representation
                 ui.label(
                     egui::RichText::new("🟡")
                         .size(64.0)
