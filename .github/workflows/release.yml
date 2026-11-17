@@ -1,0 +1,104 @@
+name: Release Builds
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build & Package macOS (.dmg)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin, x86_64-apple-darwin
+
+      - name: Build macOS App & DMG
+        run: |
+          cd macos
+          make dmg
+
+      - name: Upload macOS Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            macos/build/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-release:
+    name: Build & Package Debian/Ubuntu (.deb)
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build extra-cmake-modules gcc g++ \
+            libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev \
+            libxkbcommon-dev libgl1-mesa-dev libx11-dev
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build and Package .deb
+        run: |
+          chmod +x scripts/build-deb.sh
+          ./scripts/build-deb.sh
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows:
+    name: Build & Package Windows (VnCharKey.exe)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build VnCharKey for Windows
+        run: |
+          cd windows
+          cargo build --release
+
+      - name: Package Windows Zip
+        shell: pwsh
+        run: |
+          mkdir dist
+          if (Test-Path windows/target/release/VnCharKey.exe) {
+              Copy-Item windows/target/release/VnCharKey.exe dist/
+          } elseif (Test-Path target/release/VnCharKey.exe) {
+              Copy-Item target/release/VnCharKey.exe dist/
+          }
+          Copy-Item windows/assets/vncharkey.ico dist/
+          Copy-Item windows/README.md dist/
+          Compress-Archive -Path dist/* -DestinationPath VnCharKey-Windows-x64.zip
+
+      - name: Upload Windows Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            VnCharKey-Windows-x64.zip
+            dist/VnCharKey.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

@@ -1,0 +1,179 @@
+#pragma once
+
+#include <fcitx/addonfactory.h>
+#include <fcitx/addoninstance.h>
+#include <fcitx/addonmanager.h>
+#include <fcitx/inputmethodengine.h>
+#include <fcitx/inputcontext.h>
+#include <fcitx/inputpanel.h>
+#include <fcitx/text.h>
+#include <fcitx/event.h>
+#include <fcitx/action.h>
+#include <fcitx/menu.h>
+#include <fcitx/statusarea.h>
+#include <fcitx/instance.h>
+#include <fcitx/userinterfacemanager.h>
+#include <fcitx-utils/signals.h>
+#include <fcitx-utils/textformatflags.h>
+#include <fcitx/candidatelist.h>
+#include <cstdint>
+#include <cstddef>
+#include <chrono>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <memory>
+
+// C-ABI declarations exported from Rust (crates/fcitx5-vncharkey-ffi)
+extern "C" {
+    void* fcitx5_vncharkey_init();
+    void* fcitx5_vncharkey_init_with_method(uint32_t method);
+    void fcitx5_vncharkey_free(void* ctx);
+    int fcitx5_vncharkey_process_key(
+        void* ctx,
+        uint32_t key_char,
+        double timestamp_ms,
+        size_t* out_backspaces,
+        char** out_commit
+    );
+    void fcitx5_vncharkey_reset(void* ctx);
+    void fcitx5_vncharkey_handle_backspace(void* ctx);
+    void fcitx5_vncharkey_load_macros(void* ctx, const char* path);
+    void fcitx5_vncharkey_load_dictionary(void* ctx, const char* path);
+    void fcitx5_vncharkey_free_string(char* s);
+    void fcitx5_vncharkey_set_method(void* ctx, uint32_t method);
+    uint32_t fcitx5_vncharkey_get_method(void* ctx);
+    void fcitx5_vncharkey_set_auto_restore(void* ctx, bool enabled);
+    bool fcitx5_vncharkey_get_auto_restore(void* ctx);
+    void fcitx5_vncharkey_set_spell_check(void* ctx, bool enabled);
+    bool fcitx5_vncharkey_get_spell_check(void* ctx);
+    void fcitx5_vncharkey_set_dictionary_enabled(void* ctx, bool enabled);
+    bool fcitx5_vncharkey_get_dictionary_enabled(void* ctx);
+    void fcitx5_vncharkey_set_macro_enabled(void* ctx, bool enabled);
+    bool fcitx5_vncharkey_get_macro_enabled(void* ctx);
+    void fcitx5_vncharkey_set_bracket_transform(void* ctx, bool enabled);
+    void fcitx5_vncharkey_set_quick_telex(void* ctx, bool enabled);
+    void fcitx5_vncharkey_set_quick_start_consonant(void* ctx, bool enabled);
+    void fcitx5_vncharkey_set_quick_end_consonant(void* ctx, bool enabled);
+    void fcitx5_vncharkey_set_w2u(void* ctx, uint32_t mode);
+    void fcitx5_vncharkey_set_tone_style(void* ctx, uint32_t style);
+    uint32_t fcitx5_vncharkey_get_tone_style(void* ctx);
+    void fcitx5_vncharkey_set_charset(void* ctx, uint32_t charset);
+    void fcitx5_vncharkey_set_idle_timeout(void* ctx, uint64_t ms);
+    uint64_t fcitx5_vncharkey_get_idle_timeout(void* ctx);
+
+    char* fcitx5_vncharkey_get_current_word(void* ctx);
+    char* fcitx5_vncharkey_get_completed_word(void* ctx);
+    bool fcitx5_vncharkey_has_active_word(void* ctx);
+    int fcitx5_vncharkey_flip_word(void* ctx, size_t* out_backspaces, char** out_commit);
+    int fcitx5_vncharkey_undo_macro(void* ctx, size_t* out_backspaces, char** out_commit);
+    int fcitx5_vncharkey_undo_escape(void* ctx, size_t* out_backspaces, char** out_commit);
+    int fcitx5_vncharkey_rescue_sentence(void* ctx, const char* text, char** out_rescued);
+    int fcitx5_vncharkey_apply_accent_to_selection(void* ctx, const char* selection, uint32_t ch, char** out_transformed);
+    char* fcitx5_vncharkey_search_symbols(const char* query, uint32_t limit);
+}
+
+class VnCharKeyEngine : public fcitx::InputMethodEngineV2 {
+public:
+    explicit VnCharKeyEngine(fcitx::AddonManager* manager);
+    ~VnCharKeyEngine() override;
+
+    void keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyEvent &keyEvent) override;
+    void reset(const fcitx::InputMethodEntry &entry, fcitx::InputContextEvent &event) override;
+    void activate(const fcitx::InputMethodEntry &entry, fcitx::InputContextEvent &event) override;
+    void deactivate(const fcitx::InputMethodEntry &entry, fcitx::InputContextEvent &event) override;
+    void reloadConfig() override;
+
+private:
+    void* getContext(const std::string& entryName);
+    void loadConfig();
+    void saveConfig();
+    void loadAppModes();
+    void saveAppModes();
+    std::string getOutputModeForContext(fcitx::InputContext* ic);
+    void setOutputModeForContext(fcitx::InputContext* ic, const std::string& mode);
+    void setupStatusMenu();
+    void updateActionState(fcitx::InputContext* ic = nullptr);
+
+    fcitx::AddonManager* manager_;
+    void* ctx_auto_ = nullptr;
+    void* ctx_telex_ = nullptr;
+    void* ctx_vni_ = nullptr;
+
+    std::string config_method_ = "Auto";
+    std::string config_charset_ = "Unicode";
+    std::string config_output_mode_ = "Direct";
+    std::string config_flip_shortcut_ = "Ctrl+Shift+Z";
+    bool config_remember_app_mode_ = true;
+    bool config_preedit_tooltip_ = true;
+    bool config_persistent_guard_ = true;
+    int config_direct_delay_ms_ = 0; // 0 = auto (0ms for editors, 4ms for web browsers)
+    uint64_t config_idle_timeout_ms_ = 0; // 0 = disabled (default), >0 = timeout in ms
+    std::unordered_map<std::string, std::string> app_output_modes_;
+
+    // Grace Period Focus Tracker for Java IDEs & Wine
+    std::chrono::steady_clock::time_point last_focus_out_time_;
+    std::string last_focus_out_prog_;
+    std::string last_focus_out_entry_;
+
+    bool config_auto_restore_ = true;
+    bool config_macro_ = true;
+    bool config_spell_check_ = true;
+    bool config_dictionary_ = true;
+    bool config_modern_style_ = false;
+    bool config_bracket_transform_ = false;
+    bool config_quick_telex_ = false;
+    bool config_quick_start_consonant_ = false;
+    bool config_quick_end_consonant_ = false;
+    uint32_t config_w2u_ = 0;
+    bool config_esc_restore_raw_ = false; // false = Esc passes through to app (Neovim mode), Shift+Esc undos; true = Esc undos to raw
+    bool config_select_and_replace_web_ = true;
+    bool config_word_rescue_ = true;
+
+    // Rescue Undo Cache (Escape/Backspace immediately after activation rescue)
+    std::string last_rescue_raw_;
+    std::string last_rescue_converted_;
+
+    bool isWebApp(const std::string& prog) const;
+    size_t utf8CharCount(const std::string& str) const;
+
+    bool is_forwarding_ = false;
+
+    // Fcitx5 Tray & Status Menu
+    std::unique_ptr<fcitx::SimpleAction> statusAction_;
+    std::unique_ptr<fcitx::Menu> statusMenu_;
+
+    std::unique_ptr<fcitx::SimpleAction> actionMethodAuto_;
+    std::unique_ptr<fcitx::SimpleAction> actionMethodTelex_;
+    std::unique_ptr<fcitx::SimpleAction> actionMethodVni_;
+
+    std::unique_ptr<fcitx::SimpleAction> actionOutputModeDirect_;
+    std::unique_ptr<fcitx::SimpleAction> actionOutputModePreedit_;
+    std::unique_ptr<fcitx::SimpleAction> actionPreeditTooltip_;
+
+    std::unique_ptr<fcitx::SimpleAction> actionCharsetUnicode_;
+
+    std::unique_ptr<fcitx::SimpleAction> actionAutoRestore_;
+    std::unique_ptr<fcitx::SimpleAction> actionMacro_;
+    std::unique_ptr<fcitx::SimpleAction> actionSpellCheck_;
+    std::unique_ptr<fcitx::SimpleAction> actionDictionary_;
+
+    // Quick Consonants Submenu
+    std::unique_ptr<fcitx::SimpleAction> actionQuickMenuParent_;
+    std::unique_ptr<fcitx::Menu> quickSubMenu_;
+    std::unique_ptr<fcitx::SimpleAction> actionQuickTelex_;
+    std::unique_ptr<fcitx::SimpleAction> actionQuickStartConsonant_;
+    std::unique_ptr<fcitx::SimpleAction> actionQuickEndConsonant_;
+
+    std::unique_ptr<fcitx::SimpleAction> actionSeparator1_;
+    std::unique_ptr<fcitx::SimpleAction> actionSeparator2_;
+    std::unique_ptr<fcitx::SimpleAction> actionSeparator3_;
+    std::unique_ptr<fcitx::SimpleAction> actionSettings_;
+
+    std::vector<fcitx::Connection> connections_;
+};
+
+class VnCharKeyEngineFactory : public fcitx::AddonFactory {
+public:
+    fcitx::AddonInstance *create(fcitx::AddonManager *manager) override;
+};

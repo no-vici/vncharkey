@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name[vi]=Cài đặt Fcitx5 VnCharKey
+Name=Fcitx5 VnCharKey Settings
+Comment[vi]=Tuỳ chỉnh bộ gõ Tiếng Việt Fcitx5 VnCharKey (Tự Do Edition)
+Comment=Configure Fcitx5 VnCharKey Vietnamese Input Method
+Exec=fcitx5-vncharkey-settings
+Icon=vncharkey
+StartupWMClass=org.fcitx.Fcitx5.Addon.VnCharKey.Settings
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;Utility;

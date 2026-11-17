@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# VnCharKey (Tự Do Edition) - 1-Click Installer for Linux (Arch / Debian / Fedora)
+# ==============================================================================
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+WORKSPACE_DIR="$PWD"
+
+echo -e "${BLUE}══════════════════════════════════════════════════════════════${NC}"
+echo -e "${YELLOW}  VnCharKey: TỰ DO EDITION - 1-CLICK INSTALLER                 ${NC}"
+echo -e "${YELLOW}  Bộ Gõ Tiếng Việt 100% Safe Rust cho Fcitx5                 ${NC}"
+echo -e "${BLUE}══════════════════════════════════════════════════════════════${NC}"
+
+# Check for Rust / Cargo
+if ! command -v cargo >/dev/null 2>&1; then
+    echo -e "${RED}[LỖI] Không tìm thấy Cargo/Rust. Vui lòng cài đặt Rust: sudo pacman -S rust cargo${NC}"
+    exit 1
+fi
+
+# Workaround for Cargo & Make when workspace path contains a colon ':'
+if [[ "$WORKSPACE_DIR" == *:* ]]; then
+    export CARGO_TARGET_DIR="/tmp/cargo-vncharkey-target"
+    echo -e "${YELLOW}[TỰ ĐỘNG XỬ LÝ] Đường dẫn thư mục chứa dấu ':' ($WORKSPACE_DIR).${NC}"
+    echo -e "${YELLOW}Đang tự động chuyển vùng build sang /tmp để bảo đảm GNU Make và Cargo biên dịch thành công 100%.${NC}\n"
+fi
+
+TARGET_DIR="${CARGO_TARGET_DIR:-target}/release"
+
+echo -e "\n${GREEN}==> 1/5. Chạy bộ kiểm thử tự động đa tầng (Core, VietC, Property & FFI)...${NC}"
+cargo test --workspace
+
+echo -e "\n${GREEN}==> 2/5. Biên dịch mã nguồn Rust (Release Mode - LTO Fat)...${NC}"
+cargo build --release
+
+ADDON_SO=""
+echo -e "\n${GREEN}==> 3/5. Biên dịch Fcitx5 Native C++ Addon Module...${NC}"
+if command -v cmake >/dev/null 2>&1; then
+    if [[ "$WORKSPACE_DIR" == *:* ]]; then
+        SHADOW_BUILD_DIR="/tmp/vncharkey-addon-build"
+        rm -rf "$SHADOW_BUILD_DIR"
+        mkdir -p "$SHADOW_BUILD_DIR"
+        cp -r "$WORKSPACE_DIR/fcitx5-addon" "$WORKSPACE_DIR/data" "$SHADOW_BUILD_DIR/"
+        rm -rf "$SHADOW_BUILD_DIR/fcitx5-addon/build"
+        mkdir -p "$SHADOW_BUILD_DIR/fcitx5-addon/build"
+        cd "$SHADOW_BUILD_DIR/fcitx5-addon/build"
+        if command -v ninja >/dev/null 2>&1; then
+            cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DRUST_TARGET_DIR="$TARGET_DIR" ..
+            ninja
+        else
+            cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DRUST_TARGET_DIR="$TARGET_DIR" ..
+            cmake --build . -j"$(nproc)"
+        fi
+        ADDON_SO="$SHADOW_BUILD_DIR/fcitx5-addon/build/fcitx5-vncharkey-addon.so"
+        cd "$WORKSPACE_DIR"
+    else
+        mkdir -p fcitx5-addon/build
+        cd fcitx5-addon/build
+        if command -v ninja >/dev/null 2>&1; then
+            cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DRUST_TARGET_DIR="$TARGET_DIR" ..
+            ninja
+        else
+            cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DRUST_TARGET_DIR="$TARGET_DIR" ..
+            cmake --build . -j"$(nproc)"
+        fi
+        ADDON_SO="$WORKSPACE_DIR/fcitx5-addon/build/fcitx5-vncharkey-addon.so"
+        cd "$WORKSPACE_DIR"
+    fi
+else
+    echo -e "${YELLOW}[CẢNH BÁO] Không tìm thấy CMake. Bỏ qua bước biên dịch C++ addon.${NC}"
+fi
+
+echo -e "\n${GREEN}==> 4/5. Cài đặt các tệp vào hệ thống (/usr)...${NC}"
+PREFIX="/usr"
+
+# Core libraries
+sudo install -Dm755 "${TARGET_DIR}/libfcitx5_vncharkey_ffi.so" "$PREFIX/lib/libfcitx5_vncharkey_ffi.so"
+sudo ldconfig 2>/dev/null || true
+
+# Fcitx5 addon library
+if [ -n "$ADDON_SO" ] && [ -f "$ADDON_SO" ]; then
+    sudo install -Dm755 "$ADDON_SO" "$PREFIX/lib/fcitx5/fcitx5-vncharkey-addon.so"
+elif [ -f fcitx5-addon/build/fcitx5-vncharkey-addon.so ]; then
+    sudo install -Dm755 fcitx5-addon/build/fcitx5-vncharkey-addon.so "$PREFIX/lib/fcitx5/fcitx5-vncharkey-addon.so"
+fi
+
+# Fcitx5 metadata configuration (Single unified VnCharKey entry like fcitx5-lilypad)
+sudo install -Dm644 data/addon/vncharkey.conf "$PREFIX/share/fcitx5/addon/vncharkey.conf"
+sudo install -Dm644 data/inputmethod/vncharkey.conf "$PREFIX/share/fcitx5/inputmethod/vncharkey.conf"
+sudo rm -f "$PREFIX/share/fcitx5/inputmethod/vncharkey-telex.conf" "$PREFIX/share/fcitx5/inputmethod/vncharkey-vni.conf"
+# Icons (Scaled to 24x24 / 22x22 matching lilypad status bar and panel standards)
+sudo mkdir -p "$PREFIX/share/icons"
+sudo cp -r data/icons/hicolor "$PREFIX/share/icons/"
+sudo cp -r data/icons/breeze "$PREFIX/share/icons/"
+sudo cp -r data/icons/breeze-dark "$PREFIX/share/icons/"
+sudo gtk-update-icon-cache -q -t -f "$PREFIX/share/icons/hicolor" 2>/dev/null || true
+
+# Native 100% Rust Settings GUI Application
+sudo install -Dm755 "${TARGET_DIR}/fcitx5-vncharkey-settings" "$PREFIX/bin/fcitx5-vncharkey-settings"
+sudo ln -sf fcitx5-vncharkey-settings "$PREFIX/bin/vncharkey-settings"
+sudo install -Dm644 data/org.fcitx.Fcitx5.Addon.VnCharKey.Settings.desktop "$PREFIX/share/applications/org.fcitx.Fcitx5.Addon.VnCharKey.Settings.desktop"
+
+# Neovim integration runtime plugin (Auto-loadable across system or user configs)
+sudo install -Dm644 data/neovim/lua/vncharkey.lua "$PREFIX/share/nvim/runtime/lua/vncharkey.lua" 2>/dev/null || true
+
+# Restart Fcitx5 to pick up new input methods
+echo -e "\n${GREEN}==> 5/5. Khởi động lại Fcitx5 để nạp bộ gõ mới...${NC}"
+fcitx5 -r -d 2>/dev/null || true
+
+echo -e "\n${BLUE}══════════════════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}  CÀI ĐẶT HOÀN TẤT THÀNH CÔNG!                               ${NC}"
+echo -e "${YELLOW}  1. Mở 'fcitx5-configtool' để thêm bộ gõ 'VnCharKey'           ${NC}"
+echo -e "${YELLOW}  2. Chọn VNI / Telex / Auto trên Menu Nhanh hoặc Cài Đặt     ${NC}"
+echo -e "${BLUE}══════════════════════════════════════════════════════════════${NC}"

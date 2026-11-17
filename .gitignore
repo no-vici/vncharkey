@@ -1,0 +1,30 @@
+# Cargo & CMake build artifacts
+target/
+Cargo.lock
+build/
+fcitx5-addon/build/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# System & Editor
+*.log
+*.deb
+*.tar.zst
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.aistudio/
+.antigravity/
+.antigravityignore
+.antigravityrules
+
+# misc
+refercences/
+vncharkey_codebase.txt
+generate_codebase_text.py
+
+scripts/publish-ppa.sh
