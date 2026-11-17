@@ -4,7 +4,7 @@
 
 <img src="assets/logo.png" alt="VnCharKey Official Logo" width="128" height="128" />
 
-**Bộ Gõ Tiếng Việt Hiệu Năng Cao Cho Linux, macOS & Windows**  
+**Bộ Gõ Tiếng Việt Mượt Mà Cho Linux, macOS & Windows**  
 *Được phát triển bằng Rust kết hợp Native C++ Fcitx5 Module & Cocoa / Win32.*  
 *Hội tụ tinh hoa xử lý biến âm từ **OpenViet IME**, **OpenKey**, **GoNhanh**, **VietC** và thuật toán Micro-diff từ **Lilypad**.*  
 *Biểu tượng hài hòa giữa hình tượng Nón Lá truyền thống và chữ V mang phong cách hiện đại.*
@@ -20,8 +20,6 @@
 </div>
 
 ---
-
-*Nếu bạn hông thích biểu tượng của bộ gõ thì hãy bỏ qua và lựa chọn những bộ khác với những tính năng vượt trội tương tự như [fcitx5-lilypad](https://github.com/chiconcota/fcitx5-lilypad) (chiconcota). Xin đừng vì sự khác biệt về ý thức hệ hay quan điểm chánh trị mà report đứa con tinh thần của một coding learner thật sự yêu tự do trên từng ký tự anh ta gõ xuống.*
 
 ## 📖 Mục Lục
 
