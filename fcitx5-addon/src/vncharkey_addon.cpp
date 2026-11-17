@@ -792,6 +792,12 @@ std::string VnCharKeyEngine::getOutputModeForContext(fcitx::InputContext* ic) {
                 lower_prog.find("discord") != std::string::npos ||
                 lower_prog.find("telegram") != std::string::npos ||
                 lower_prog.find("teams") != std::string::npos ||
+                lower_prog.find("skype") != std::string::npos ||
+                lower_prog.find("zalo") != std::string::npos ||
+                lower_prog.find("soffice") != std::string::npos ||
+                lower_prog.find("libreoffice") != std::string::npos ||
+                lower_prog.find("gedit") != std::string::npos ||
+                lower_prog.find("gnome-text-editor") != std::string::npos ||
                 lower_prog.find("electron") != std::string::npos) {
                 return "Preedit";
             }
@@ -801,8 +807,20 @@ std::string VnCharKeyEngine::getOutputModeForContext(fcitx::InputContext* ic) {
                 lower_prog.find("rio") != std::string::npos ||
                 lower_prog.find("foot") != std::string::npos ||
                 lower_prog.find("wezterm") != std::string::npos ||
+                lower_prog.find("konsole") != std::string::npos ||
+                lower_prog.find("terminator") != std::string::npos ||
+                lower_prog.find("tilix") != std::string::npos ||
+                lower_prog.find("tabby") != std::string::npos ||
+                lower_prog.find("hyper") != std::string::npos ||
+                lower_prog.find("tilda") != std::string::npos ||
+                lower_prog.find("guake") != std::string::npos ||
+                lower_prog.find("xterm") != std::string::npos ||
+                lower_prog.find("rxvt") != std::string::npos ||
+                lower_prog.find("urxvt") != std::string::npos ||
                 lower_prog.find("terminal") != std::string::npos ||
                 lower_prog.find("code") != std::string::npos ||
+                lower_prog.find("vscodium") != std::string::npos ||
+                lower_prog.find("cursor") != std::string::npos ||
                 lower_prog.find("sublime") != std::string::npos ||
                 lower_prog.find("nvim") != std::string::npos ||
                 lower_prog.find("emacs") != std::string::npos ||
@@ -921,6 +939,16 @@ void VnCharKeyEngine::loadConfig() {
                 } else {
                     config_w2u_ = 0;
                 }
+            } else if (line.rfind("InitialCaseAnchor=", 0) == 0) {
+                config_initial_case_anchor_ = (line.find("True") != std::string::npos || line.find("true") != std::string::npos);
+            } else if (line.rfind("LearnTypingHabits=", 0) == 0) {
+                config_learn_typing_habits_ = (line.find("False") == std::string::npos && line.find("false") == std::string::npos);
+            } else if (line.rfind("HabitPromoteThreshold=", 0) == 0) {
+                try {
+                    config_habit_promote_threshold_ = std::max(1, std::stoi(line.substr(22)));
+                } catch (...) {
+                    config_habit_promote_threshold_ = 4;
+                }
             }
         }
     }
@@ -948,6 +976,9 @@ void VnCharKeyEngine::loadConfig() {
         uint32_t charset_code = (config_charset_.find("Composite") != std::string::npos || config_charset_.find("Tổ hợp") != std::string::npos) ? 1 : 0;
         fcitx5_vncharkey_set_charset(ctx, charset_code);
         fcitx5_vncharkey_set_idle_timeout(ctx, config_idle_timeout_ms_);
+        fcitx5_vncharkey_set_initial_case_anchor(ctx, config_initial_case_anchor_);
+        fcitx5_vncharkey_set_habit_learning_enabled(ctx, config_learn_typing_habits_);
+        fcitx5_vncharkey_set_habit_promote_threshold(ctx, config_habit_promote_threshold_);
     }
 }
 
@@ -1319,7 +1350,9 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
     // Return/Enter key
     if (sym == FcitxKey_Return || sym == FcitxKey_KP_Enter) {
         if (isPreeditMode && ic && fcitx5_vncharkey_has_active_word(ctx)) {
-            // Enter commits current preedit word
+            // Commit-before-hide (Bamboo / Dokey style):
+            // Commit preedit buffer FIRST, then reset panel and consume Enter event
+            // to completely prevent double-word / repeated text in Chat apps (Zalo, Slack, Telegram, Messenger).
             char* cur = fcitx5_vncharkey_get_current_word(ctx);
             if (cur && cur[0] != '\0') {
                 ic->commitString(cur);
@@ -1474,13 +1507,19 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
 
     int consumed = fcitx5_vncharkey_process_key(ctx, ch, timestamp_ms, &out_backspaces, &out_commit);
 
-    // Google Sheets / Autocomplete selection cleanup: if there is an active selection after caret, clear it
+    // Selection cleanup: if there is an active selection after caret (such as browser URL bar or spreadsheet autocomplete),
+    // clear it safely so that new keystrokes don't get swallowed or misaligned.
     if (ic && ic->surroundingText().isValid()) {
         const auto& surrounding = ic->surroundingText();
-        if (surrounding.cursor() < surrounding.anchor()) {
-            unsigned int deleteAfter = surrounding.anchor() - surrounding.cursor();
-            if (deleteAfter > 0) {
-                ic->deleteSurroundingText(0, deleteAfter);
+        int cur = surrounding.cursor();
+        int anc = surrounding.anchor();
+        if (cur >= 0 && anc >= 0 && cur != anc) {
+            int start = std::min(cur, anc);
+            int end = std::max(cur, anc);
+            unsigned int sel_len = static_cast<unsigned int>(end - start);
+            if (sel_len > 0) {
+                int offset = start - cur;
+                ic->deleteSurroundingText(offset, sel_len);
             }
         }
     }
@@ -1641,7 +1680,10 @@ bool VnCharKeyEngine::isWebApp(const std::string& prog) const {
         lower_prog.find("discord") != std::string::npos ||
         lower_prog.find("notion") != std::string::npos ||
         lower_prog.find("element") != std::string::npos ||
-        lower_prog.find("teams") != std::string::npos
+        lower_prog.find("teams") != std::string::npos ||
+        lower_prog.find("zalo") != std::string::npos ||
+        lower_prog.find("telegram") != std::string::npos ||
+        lower_prog.find("skype") != std::string::npos
     );
 }
 
