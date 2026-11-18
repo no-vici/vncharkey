@@ -1222,6 +1222,7 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
                     if (config_preedit_tooltip_ || isWpsOffice(prog)) {
                         ic->inputPanel().setPreedit(text);
                     }
+                    ic->inputPanel().setCandidateList(nullptr);
                     ic->updatePreedit();
                     ic->updateUserInterface(fcitx::UserInterfaceComponent::InputPanel);
                     fcitx5_vncharkey_free_string(cur);
@@ -1283,6 +1284,7 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
                         if (config_preedit_tooltip_ || isWpsOffice(prog)) {
                             ic->inputPanel().setPreedit(text);
                         }
+                        ic->inputPanel().setCandidateList(nullptr);
                         ic->updatePreedit();
                         ic->updateUserInterface(fcitx::UserInterfaceComponent::InputPanel);
                         fcitx5_vncharkey_free_string(cur);
@@ -1412,6 +1414,7 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
                         if (config_preedit_tooltip_ || isWpsOffice(prog)) {
                             ic->inputPanel().setPreedit(text);
                         }
+                        ic->inputPanel().setCandidateList(nullptr);
                         ic->updatePreedit();
                         ic->updateUserInterface(fcitx::UserInterfaceComponent::InputPanel);
                         fcitx5_vncharkey_free_string(cur);
