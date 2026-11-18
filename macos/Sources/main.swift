@@ -476,6 +476,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem(title: "Kiểm tra bản cập nhật mới...", action: #selector(checkForUpdatesMenuAction), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Thông tin VnCharKey (About)...", action: #selector(showAboutWindow), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Live Inspector (Debug)...", action: #selector(showLiveInspector), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(NSMenuItem(title: "Thoát VnCharKey", action: #selector(quitApp), keyEquivalent: "q"))
@@ -1625,6 +1626,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         self.ipcServer?.start()
+    }
+
+    @objc func showLiveInspector() {
+        let alert = NSAlert()
+        alert.messageText = "VnCharKey - Live Inspector (Debug)"
+        alert.informativeText = KeyTapManager.shared.inspectState()
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Đóng")
+        NSApp.activate(ignoringOtherApps: true)
+        alert.runModal()
     }
 
     @objc func showAboutWindow() {
