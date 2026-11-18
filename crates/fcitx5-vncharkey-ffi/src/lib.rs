@@ -784,6 +784,21 @@ pub unsafe extern "C" fn fcitx5_vncharkey_get_stats(
     }
 }
 
+/// Returns a live-inspector snapshot string (caller must free with `fcitx5_vncharkey_free_string`).
+#[no_mangle]
+pub unsafe extern "C" fn fcitx5_vncharkey_inspect_state(
+    ctx: *const Fcitx5VnCharKeyContext,
+) -> *mut c_char {
+    if ctx.is_null() {
+        return std::ptr::null_mut();
+    }
+    let snapshot = (*ctx).engine.inspect_state();
+    match CString::new(snapshot) {
+        Ok(c_str) => c_str.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
