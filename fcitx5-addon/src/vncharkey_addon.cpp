@@ -1319,6 +1319,7 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
                             ic->deleteSurroundingText(offset, sel_len);
                             ic->commitString(cased);
                             fcitx5_vncharkey_free_string(cased);
+                            fcitx5_vncharkey_reset(ctx);
                             keyEvent.filterAndAccept();
                             return;
                         }
