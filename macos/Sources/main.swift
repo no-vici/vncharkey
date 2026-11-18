@@ -178,12 +178,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func loadCustomShortcut() -> CustomToggleShortcut {
+        let keyCodeVal: Int64
+        if defaults.object(forKey: "vncharkey.sc.keyCode") != nil {
+            keyCodeVal = Int64(defaults.integer(forKey: "vncharkey.sc.keyCode"))
+        } else {
+            keyCodeVal = -1
+        }
         return CustomToggleShortcut(
             useControl: defaults.bool(forKey: "vncharkey.sc.ctrl"),
             useOption: defaults.bool(forKey: "vncharkey.sc.opt"),
             useShift: defaults.bool(forKey: "vncharkey.sc.shift"),
             useCommand: defaults.bool(forKey: "vncharkey.sc.cmd"),
-            keyCode: Int64(defaults.integer(forKey: "vncharkey.sc.keyCode")),
+            keyCode: keyCodeVal,
             keyDisplay: defaults.string(forKey: "vncharkey.sc.keyDisplay") ?? "",
             isEnabled: defaults.bool(forKey: "vncharkey.sc.enabled")
         )
