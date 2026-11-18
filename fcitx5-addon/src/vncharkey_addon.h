@@ -43,6 +43,7 @@ extern "C" {
     void fcitx5_vncharkey_reset(void* ctx);
     void fcitx5_vncharkey_handle_backspace(void* ctx);
     void fcitx5_vncharkey_load_macros(void* ctx, const char* path);
+    void fcitx5_vncharkey_set_clipboard_text(void* ctx, const char* text);
     void fcitx5_vncharkey_load_dictionary(void* ctx, const char* path);
     void fcitx5_vncharkey_free_string(char* s);
     void fcitx5_vncharkey_set_method(void* ctx, uint32_t method);
