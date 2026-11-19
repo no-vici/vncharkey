@@ -467,6 +467,17 @@ public class KeyTapManager {
         return fcitx5_vncharkey_get_initial_case_anchor(engine)
     }
 
+    public func setDeveloperMode(_ enabled: Bool) {
+        if let engine = self.engine {
+            fcitx5_vncharkey_set_developer_mode(engine, enabled)
+        }
+    }
+
+    public func getDeveloperMode() -> Bool {
+        guard let engine = self.engine else { return true }
+        return fcitx5_vncharkey_get_developer_mode(engine)
+    }
+
     public func setW2U(_ mode: UInt32) { // 0: NonStart, 1: Always, 2: Disabled
         if let engine = self.engine {
             fcitx5_vncharkey_set_w2u(engine, mode)

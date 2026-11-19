@@ -104,6 +104,10 @@ void fcitx5_vncharkey_set_bracket_transform(Fcitx5VnCharKeyContext* ctx, bool en
 void fcitx5_vncharkey_set_initial_case_anchor(Fcitx5VnCharKeyContext* ctx, bool enabled);
 bool fcitx5_vncharkey_get_initial_case_anchor(Fcitx5VnCharKeyContext* ctx);
 
+/// Configures Developer Mode (Markdown inline `...` & fenced ```...``` code bypass).
+void fcitx5_vncharkey_set_developer_mode(Fcitx5VnCharKeyContext* ctx, bool enabled);
+bool fcitx5_vncharkey_get_developer_mode(Fcitx5VnCharKeyContext* ctx);
+
 /// Configures type w to produce ư rule (0 = NonStart, 1 = Always, 2 = Disabled).
 void fcitx5_vncharkey_set_w2u(Fcitx5VnCharKeyContext* ctx, uint32_t mode);
 

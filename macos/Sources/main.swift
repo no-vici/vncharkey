@@ -123,6 +123,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defaults.set(0, forKey: "vncharkey.charset")        // Unicode dựng sẵn NFC
             defaults.set(false, forKey: "vncharkey.bracket")    // Gõ [ ] thành ơ ư
             defaults.set(false, forKey: "vncharkey.caseAnchor") // Đồng nhất chữ hoa theo chữ cái đầu
+            defaults.set(true, forKey: "vncharkey.developerMode") // Chế độ Code (tự ngắt dấu trong `code`)
             defaults.set(false, forKey: "vncharkey.quick_telex") // Cho phép gõ nhanh phụ âm kép
             defaults.set(false, forKey: "vncharkey.quick_start") // Phụ âm đầu nhanh
             defaults.set(false, forKey: "vncharkey.quick_end")   // Phụ âm cuối nhanh
@@ -158,6 +159,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         km.setCharset(UInt32(defaults.integer(forKey: "vncharkey.charset")))
         km.setBracketTransform(defaults.bool(forKey: "vncharkey.bracket"))
         km.setInitialCaseAnchor(defaults.bool(forKey: "vncharkey.caseAnchor"))
+        let devModeVal = defaults.object(forKey: "vncharkey.developerMode") != nil ? defaults.bool(forKey: "vncharkey.developerMode") : true
+        km.setDeveloperMode(devModeVal)
         km.setW2U(UInt32(defaults.integer(forKey: "vncharkey.w2u")))
         km.setIdleTimeout(UInt64(defaults.integer(forKey: "vncharkey.idleTimeout")))
         km.setQuickTelex(defaults.bool(forKey: "vncharkey.quick_telex"))
@@ -322,6 +325,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         caseAnchorItem.state = defaults.bool(forKey: "vncharkey.caseAnchor") ? .on : .off
         menu.addItem(caseAnchorItem)
 
+        let devModeItem = NSMenuItem(title: "Chế độ Code (Tự ngắt dấu trong `code`)", action: #selector(toggleDeveloperMode(_:)), keyEquivalent: "")
+        devModeItem.state = km.getDeveloperMode() ? .on : .off
+        menu.addItem(devModeItem)
+
         // Menu con: Tùy chọn Tốc ký (Quick Consonants)
         let quickMenu = NSMenu()
         let quickTelexItem = NSMenuItem(title: "Quick Telex (cc->ch, kk->kh, tt->th...)", action: #selector(toggleQuickTelex(_:)), keyEquivalent: "")
@@ -477,6 +484,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "Kiểm tra bản cập nhật mới...", action: #selector(checkForUpdatesMenuAction), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Thông tin VnCharKey (About)...", action: #selector(showAboutWindow), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Live Inspector (Debug)...", action: #selector(showLiveInspector), keyEquivalent: ""))
+
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(NSMenuItem(title: "Thoát VnCharKey", action: #selector(quitApp), keyEquivalent: "q"))
@@ -615,6 +623,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let next = !defaults.bool(forKey: "vncharkey.caseAnchor")
         defaults.set(next, forKey: "vncharkey.caseAnchor")
         keyManager?.setInitialCaseAnchor(next)
+        rebuildMenu()
+        syncDashboardControls()
+    }
+
+    @objc func toggleDeveloperMode(_ sender: NSMenuItem) {
+        guard let km = keyManager else { return }
+        let next = !km.getDeveloperMode()
+        defaults.set(next, forKey: "vncharkey.developerMode")
+        km.setDeveloperMode(next)
         rebuildMenu()
         syncDashboardControls()
     }
