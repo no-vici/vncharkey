@@ -78,6 +78,15 @@ uint32_t fcitx5_vncharkey_get_method(Fcitx5VnCharKeyContext* ctx);
 void fcitx5_vncharkey_set_auto_restore(Fcitx5VnCharKeyContext* ctx, bool enabled);
 bool fcitx5_vncharkey_get_auto_restore(Fcitx5VnCharKeyContext* ctx);
 
+/// Retrieves typing statistics from the engine.
+void fcitx5_vncharkey_get_stats(
+    const Fcitx5VnCharKeyContext* ctx,
+    uint64_t* words_typed,
+    uint64_t* english_restored,
+    uint64_t* macros_expanded,
+    uint64_t* keystrokes_saved
+);
+
 /// Configures Chánh Tả spell checking.
 void fcitx5_vncharkey_set_spell_check(Fcitx5VnCharKeyContext* ctx, bool enabled);
 bool fcitx5_vncharkey_get_spell_check(Fcitx5VnCharKeyContext* ctx);
