@@ -1,6 +1,6 @@
 [package]
 name = "vncharkey-windows"
-version = "0.3.6"
+version = "0.3.7"
 authors = ["VnCharKey Contributors"]
 edition = "2021"
 license = "GPL-3.0-or-later"
