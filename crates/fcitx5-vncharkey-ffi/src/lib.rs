@@ -780,6 +780,29 @@ pub unsafe extern "C" fn fcitx5_vncharkey_get_developer_mode(
     }
 }
 
+/// Configures whether typing Vietnamese inside Markdown backticks and fenced code blocks is allowed.
+#[no_mangle]
+pub unsafe extern "C" fn fcitx5_vncharkey_set_allow_vietnamese_in_backtick(
+    ctx: *mut Fcitx5VnCharKeyContext,
+    enabled: bool,
+) {
+    if !ctx.is_null() {
+        (*ctx).engine.set_allow_vietnamese_in_backtick(enabled);
+    }
+}
+
+/// Returns whether typing Vietnamese inside Markdown backticks is allowed.
+#[no_mangle]
+pub unsafe extern "C" fn fcitx5_vncharkey_get_allow_vietnamese_in_backtick(
+    ctx: *const Fcitx5VnCharKeyContext,
+) -> bool {
+    if !ctx.is_null() {
+        (*ctx).engine.allow_vietnamese_in_backtick()
+    } else {
+        false
+    }
+}
+
 /// Reads typing statistics from the engine.
 #[no_mangle]
 pub unsafe extern "C" fn fcitx5_vncharkey_get_stats(
