@@ -538,6 +538,7 @@ void VnCharKeyEngine::updateActionState(fcitx::InputContext* ic) {
 
 void VnCharKeyEngine::activate(const fcitx::InputMethodEntry &entry, fcitx::InputContextEvent &event) {
     FCITX_UNUSED(entry);
+    neovim_bypass_ = false;
     if (ctx_auto_) fcitx5_vncharkey_reset(ctx_auto_);
     if (ctx_telex_) fcitx5_vncharkey_reset(ctx_telex_);
     if (ctx_vni_) fcitx5_vncharkey_reset(ctx_vni_);
@@ -633,6 +634,7 @@ void VnCharKeyEngine::activate(const fcitx::InputMethodEntry &entry, fcitx::Inpu
 
 void VnCharKeyEngine::deactivate(const fcitx::InputMethodEntry &entry, fcitx::InputContextEvent &event) {
     FCITX_UNUSED(entry);
+    neovim_bypass_ = false;
     if (ctx_auto_) fcitx5_vncharkey_reset(ctx_auto_);
     if (ctx_telex_) fcitx5_vncharkey_reset(ctx_telex_);
     if (ctx_vni_) fcitx5_vncharkey_reset(ctx_vni_);
