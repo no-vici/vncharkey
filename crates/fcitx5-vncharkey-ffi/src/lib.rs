@@ -15,17 +15,31 @@ pub extern "C" fn fcitx5_vncharkey_init() -> *mut Fcitx5VnCharKeyContext {
     fcitx5_vncharkey_init_with_method(0)
 }
 
-/// Initializes a new VnCharKey engine instance with a specific method (0 = Auto, 1 = Telex, 2 = VNI, 3 = SimpleTelex).
-#[no_mangle]
-pub extern "C" fn fcitx5_vncharkey_init_with_method(method: u32) -> *mut Fcitx5VnCharKeyContext {
-    let input_method = match method {
+#[inline]
+fn method_from_u32(method: u32) -> vncharkey_core::InputMethod {
+    match method {
         1 => vncharkey_core::InputMethod::Telex,
         2 => vncharkey_core::InputMethod::Vni,
         3 => vncharkey_core::InputMethod::SimpleTelex,
         _ => vncharkey_core::InputMethod::Auto,
-    };
+    }
+}
+
+#[inline]
+fn method_to_u32(method: vncharkey_core::InputMethod) -> u32 {
+    match method {
+        vncharkey_core::InputMethod::Auto => 0,
+        vncharkey_core::InputMethod::Telex => 1,
+        vncharkey_core::InputMethod::Vni => 2,
+        vncharkey_core::InputMethod::SimpleTelex => 3,
+    }
+}
+
+/// Initializes a new VnCharKey engine instance with a specific method (0 = Auto, 1 = Telex, 2 = VNI, 3 = SimpleTelex).
+#[no_mangle]
+pub extern "C" fn fcitx5_vncharkey_init_with_method(method: u32) -> *mut Fcitx5VnCharKeyContext {
     let config = EngineConfig {
-        method: input_method,
+        method: method_from_u32(method),
         ..EngineConfig::default()
     };
     let ctx = Box::new(Fcitx5VnCharKeyContext {
@@ -368,26 +382,15 @@ pub unsafe extern "C" fn fcitx5_vncharkey_set_habit_log_path(
 #[no_mangle]
 pub unsafe extern "C" fn fcitx5_vncharkey_set_method(ctx: *mut Fcitx5VnCharKeyContext, method: u32) {
     if !ctx.is_null() {
-        let m = match method {
-            1 => vncharkey_core::InputMethod::Telex,
-            2 => vncharkey_core::InputMethod::Vni,
-            3 => vncharkey_core::InputMethod::SimpleTelex,
-            _ => vncharkey_core::InputMethod::Auto,
-        };
-        (*ctx).engine.set_method(m);
+        (*ctx).engine.set_method(method_from_u32(method));
     }
 }
 
-/// Returns active input method (0 = Auto, 1 = Telex, 2 = VNI).
+/// Returns active input method (0 = Auto, 1 = Telex, 2 = VNI, 3 = SimpleTelex).
 #[no_mangle]
 pub unsafe extern "C" fn fcitx5_vncharkey_get_method(ctx: *mut Fcitx5VnCharKeyContext) -> u32 {
     if !ctx.is_null() {
-        match (*ctx).engine.method() {
-            vncharkey_core::InputMethod::Auto => 0,
-            vncharkey_core::InputMethod::Telex => 1,
-            vncharkey_core::InputMethod::Vni => 2,
-            vncharkey_core::InputMethod::SimpleTelex => 3,
-        }
+        method_to_u32((*ctx).engine.method())
     } else {
         0
     }
