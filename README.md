@@ -98,14 +98,28 @@ fcitx5-vncharkey/
 │           ├── doctor.rs            # [Mới] Trình kiểm tra môi trường Fcitx5 & /proc/PID Electron Advisor
 │           └── config.rs            # Trình đọc/ghi cấu hình ~/.config/fcitx5/conf/
 │
-├── fcitx5-addon/                    # [Fcitx5 Native Addon] Module C++ cho Fcitx5
+├── fcitx5-addon/                    # [Linux] Module C++ cho Fcitx5 (Wayland & X11)
 │   ├── CMakeLists.txt
 │   └── src/
-│       ├── vncharkey_addon.h          # Khai báo lớp VnCharKeyEngine kế thừa InputMethodEngineV2
-│       └── vncharkey_addon.cpp        # Đăng ký sự kiện phím, StatusArea và Menu tùy chọn
+│       ├── vncharkey_addon.h        # Khai báo lớp VnCharKeyEngine kế thừa InputMethodEngineV2
+│       └── vncharkey_addon.cpp      # Đăng ký sự kiện phím, StatusArea, Menu & Unix Socket IPC
 │
+├── macos/                           # [macOS] Ứng dụng Swift + CGEventTap (Universal x86_64 + arm64)
+│   ├── Makefile                     # Đóng gói .app và .dmg
+│   ├── Bridging-Header.h            # Khai báo C-ABI FFI sang libfcitx5_vncharkey_ffi.a
+│   └── Sources/
+│       ├── main.swift               # Menu Bar, Settings, Live Inspector (NSPanel), Trace Export
+│       └── KeyTapManager.swift      # CGEventTap hook, NSPasteboard ($CLIPBOARD) & Trace Ring Buffer
+│
+├── windows/                         # [Windows] Ứng dụng Win32 API thuần Rust (WH_KEYBOARD_LL + SendInput)
+│   ├── Cargo.toml
+│   └── src/
+│       └── main.rs                  # System Tray, Win32 Hook, Clipboard, Live Inspector & Trace Export
+│
+├── presets/                         # Bộ từ điển & Macro mẫu (Sài Gòn Xưa, Dev/Git, Toán Học)
+├── scripts/                         # verify-release.sh (kiểm thử 3 tầng), sync_to_vncharkey.py, build-deb.sh
 ├── data/                            # Desktop entries, metadata & icon packs
-├── install.sh                       # Script biên dịch và cài đặt tự động 1-Click
+├── install.sh                       # Script biên dịch và cài đặt tự động 1-Click trên Linux
 └── PKGBUILD                         # Script đóng gói chuẩn cho Arch Linux
 ```
 
@@ -227,9 +241,9 @@ Khác biệt với các bộ gõ truyền thống dựa trên chuỗi regex ho�
   - Khi người dùng gõ thêm nguyên âm hoặc mở rộng từ, dấu thanh tự động dịch chuyển mượt mà đến đúng vị trí âm chính mới mà không làm vỡ từ:
     - `ho` + `s` $\to$ `hó` $\xrightarrow{+\text{a}}$ `hoá` (Kiểu mới Modern) hoặc `hóa` (Kiểu cũ Classic).
     - `thuy` + `r` $\to$ `thủy` $\xrightarrow{+\text{a}}$ `thuyển` $\to$ chuyển dấu chuẩn xác.
-- **Hỗ trợ Song Song Chuẩn Dấu Mới & Cổ Điển**:
-  - Dấu Mới (Modern): `hóa`, `hòa`, `thủy`, `họa` (dấu đặt trên âm chính).
-  - Dấu Cổ Điển (Classic): `hoá`, `hoà`, `thuỷ`, `hoạ`.
+- **Hỗ trợ Song Song Chuẩn Cổ Điển & Dấu Mới**:
+  - Dấu Mới (Classic): `hóa`, `hòa`, `thủy`, `họa` (dấu đặt trên âm chính).
+  - Dấu Cổ Điển (Modern): `hoá`, `hoà`, `thuỷ`, `hoạ`.
 
 ---
 
@@ -325,7 +339,7 @@ Học hỏi và phát triển từ các công cụ thực chiến trên Wayland:
 
 ---
 
-### 3.15. Bộ Lọc & Đặc Trị Thực Chiến Linux / Wayland (Hardened Runtime Fixes)
+### 3.16. Bộ Lọc & Đặc Trị Thực Chiến Linux / Wayland (Hardened Runtime Fixes)
 Được tôi luyện qua hàng loạt tình huống thực tế trên môi trường Linux Wayland và X11:
 - **WPS Office (`hidesClientPreedit`)**: Bộ ứng dụng WPS Office (`wps`, `wpp`, `et`) tự vẽ giao diện nhập liệu riêng. VnCharKey tự động phát hiện và áp dụng `hidesClientPreedit = true`, loại bỏ hoàn toàn hiện tượng hiển thị 2 dòng chữ chồng chéo lên nhau.
 - **Google Sheets (`deleteAfterChars`)**: Xử lý đặc thù cho bảng tính Google Docs/Sheets, tối ưu hoá chuỗi sự kiện xoá/chèn ký tự (`deleteAfterChars`) để tránh làm xáo trộn ô tính hoặc mất nội dung khi đang chỉnh sửa cell.
