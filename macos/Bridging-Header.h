@@ -122,6 +122,7 @@ void fcitx5_vncharkey_set_sentence_momentum(Fcitx5VnCharKeyContext* ctx, bool en
 bool fcitx5_vncharkey_get_sentence_momentum(const Fcitx5VnCharKeyContext* ctx);
 void fcitx5_vncharkey_set_math_context(Fcitx5VnCharKeyContext* ctx, bool enabled);
 bool fcitx5_vncharkey_get_math_context(const Fcitx5VnCharKeyContext* ctx);
+void fcitx5_vncharkey_set_auto_capitalize(Fcitx5VnCharKeyContext* ctx, bool enabled);
 
 /// Configures type w to produce ư rule (0 = NonStart, 1 = Always, 2 = Disabled).
 void fcitx5_vncharkey_set_w2u(Fcitx5VnCharKeyContext* ctx, uint32_t mode);
