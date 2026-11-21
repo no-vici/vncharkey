@@ -1642,6 +1642,11 @@ void VnCharKeyEngine::keyEvent(const fcitx::InputMethodEntry &entry, fcitx::KeyE
             fcitx5_vncharkey_free_string(cur_before);
         }
 
+        if (config_backspace_by_syllable_ && cur_before_str.empty()) {
+            fcitx5_vncharkey_reset(ctx);
+            return;
+        }
+
         bool reopened = fcitx5_vncharkey_handle_backspace(ctx);
         if (config_backspace_by_syllable_ && !cur_before_str.empty() && !reopened) {
             size_t char_len = utf8CharCount(cur_before_str);
