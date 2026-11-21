@@ -123,11 +123,14 @@ pub unsafe extern "C" fn fcitx5_vncharkey_set_charset(ctx: *mut Fcitx5VnCharKeyC
 }
 
 /// Handles physical Backspace pressed by the user.
+/// Returns true if a previously completed word was reopened.
 #[no_mangle]
-pub unsafe extern "C" fn fcitx5_vncharkey_handle_backspace(ctx: *mut Fcitx5VnCharKeyContext) {
+pub unsafe extern "C" fn fcitx5_vncharkey_handle_backspace(ctx: *mut Fcitx5VnCharKeyContext) -> bool {
     if !ctx.is_null() {
         let ctx = &mut *ctx;
-        ctx.engine.handle_backspace();
+        ctx.engine.handle_backspace()
+    } else {
+        false
     }
 }
 
