@@ -140,6 +140,7 @@ VnCharKeyEngine::VnCharKeyEngine(fcitx::AddonManager* manager)
         if (actionMacro_) uiMgr.registerAction("vncharkey-macro", actionMacro_.get());
         if (actionSpellCheck_) uiMgr.registerAction("vncharkey-spellcheck", actionSpellCheck_.get());
         if (actionDictionary_) uiMgr.registerAction("vncharkey-dictionary", actionDictionary_.get());
+        if (actionUserVnDict_) uiMgr.registerAction("vncharkey-user-vn-dict", actionUserVnDict_.get());
         if (actionSettings_) uiMgr.registerAction("vncharkey-settings", actionSettings_.get());
     }
 }
@@ -155,6 +156,7 @@ VnCharKeyEngine::~VnCharKeyEngine() {
         if (actionMacro_) uiMgr.unregisterAction(actionMacro_.get());
         if (actionSpellCheck_) uiMgr.unregisterAction(actionSpellCheck_.get());
         if (actionDictionary_) uiMgr.unregisterAction(actionDictionary_.get());
+        if (actionUserVnDict_) uiMgr.unregisterAction(actionUserVnDict_.get());
         if (actionSettings_) uiMgr.unregisterAction(actionSettings_.get());
     }
     connections_.clear();
@@ -381,6 +383,16 @@ void VnCharKeyEngine::setupStatusMenu() {
         }
     }));
     statusMenu_->addAction(actionDictionary_.get());
+
+    actionUserVnDict_ = std::make_unique<fcitx::SimpleAction>();
+    actionUserVnDict_->setShortText("Từ Điển Tiếng Việt Cá Nhân...");
+    actionUserVnDict_->setLongText("Từ Điển Tiếng Việt Cá Nhân (Mở cài đặt)...");
+    connections_.push_back(actionUserVnDict_->connect<fcitx::SimpleAction::Activated>([this](fcitx::InputContext* ic) {
+        if (actionSettings_) {
+            actionSettings_->activate(ic);
+        }
+    }));
+    statusMenu_->addAction(actionUserVnDict_.get());
 
     // 3b. Quick Consonants Submenu (Tùy chọn Tốc ký...)
     actionQuickMenuParent_ = std::make_unique<fcitx::SimpleAction>();
