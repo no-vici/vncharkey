@@ -387,10 +387,8 @@ void VnCharKeyEngine::setupStatusMenu() {
     actionUserVnDict_ = std::make_unique<fcitx::SimpleAction>();
     actionUserVnDict_->setShortText("Từ Điển Tiếng Việt Cá Nhân...");
     actionUserVnDict_->setLongText("Từ Điển Tiếng Việt Cá Nhân (Mở cài đặt)...");
-    connections_.push_back(actionUserVnDict_->connect<fcitx::SimpleAction::Activated>([this](fcitx::InputContext* ic) {
-        if (actionSettings_) {
-            actionSettings_->activate(ic);
-        }
+    connections_.push_back(actionUserVnDict_->connect<fcitx::SimpleAction::Activated>([](fcitx::InputContext*) {
+        launchVnCharKeySettings();
     }));
     statusMenu_->addAction(actionUserVnDict_.get());
 
