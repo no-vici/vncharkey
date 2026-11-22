@@ -754,6 +754,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Bảng Điều Khiển (Dashboard Window kiểu xKey / OpenKey)
 
     @objc func openDashboardWindow() {
+        // Ưu tiên mở giao diện egui (fcitx5-vncharkey-settings) đồng bộ với Linux nếu có sẵn trong bundle
+        let bundleBin = Bundle.main.bundlePath + "/Contents/MacOS/fcitx5-vncharkey-settings"
+        for candidate in [bundleBin, "/usr/local/bin/fcitx5-vncharkey-settings", "/opt/homebrew/bin/fcitx5-vncharkey-settings"] {
+            if FileManager.default.isExecutableFile(atPath: candidate) {
+                let task = Process()
+                task.executableURL = URL(fileURLWithPath: candidate)
+                try? task.run()
+                return
+            }
+        }
+
         NSApp.activate(ignoringOtherApps: true)
         if let win = dashboardWindow {
             syncDashboardControls()
