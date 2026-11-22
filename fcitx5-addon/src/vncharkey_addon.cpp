@@ -140,7 +140,6 @@ VnCharKeyEngine::VnCharKeyEngine(fcitx::AddonManager* manager)
         if (actionMacro_) uiMgr.registerAction("vncharkey-macro", actionMacro_.get());
         if (actionSpellCheck_) uiMgr.registerAction("vncharkey-spellcheck", actionSpellCheck_.get());
         if (actionDictionary_) uiMgr.registerAction("vncharkey-dictionary", actionDictionary_.get());
-        if (actionUserVnDict_) uiMgr.registerAction("vncharkey-user-vn-dict", actionUserVnDict_.get());
         if (actionSettings_) uiMgr.registerAction("vncharkey-settings", actionSettings_.get());
     }
 }
@@ -156,7 +155,6 @@ VnCharKeyEngine::~VnCharKeyEngine() {
         if (actionMacro_) uiMgr.unregisterAction(actionMacro_.get());
         if (actionSpellCheck_) uiMgr.unregisterAction(actionSpellCheck_.get());
         if (actionDictionary_) uiMgr.unregisterAction(actionDictionary_.get());
-        if (actionUserVnDict_) uiMgr.unregisterAction(actionUserVnDict_.get());
         if (actionSettings_) uiMgr.unregisterAction(actionSettings_.get());
     }
     connections_.clear();
@@ -383,14 +381,6 @@ void VnCharKeyEngine::setupStatusMenu() {
         }
     }));
     statusMenu_->addAction(actionDictionary_.get());
-
-    actionUserVnDict_ = std::make_unique<fcitx::SimpleAction>();
-    actionUserVnDict_->setShortText("Từ Điển Tiếng Việt Cá Nhân...");
-    actionUserVnDict_->setLongText("Từ Điển Tiếng Việt Cá Nhân (Mở cài đặt)...");
-    connections_.push_back(actionUserVnDict_->connect<fcitx::SimpleAction::Activated>([](fcitx::InputContext*) {
-        launchVnCharKeySettings();
-    }));
-    statusMenu_->addAction(actionUserVnDict_.get());
 
     // 3b. Quick Consonants Submenu (Tùy chọn Tốc ký...)
     actionQuickMenuParent_ = std::make_unique<fcitx::SimpleAction>();
@@ -624,7 +614,6 @@ void VnCharKeyEngine::activate(const fcitx::InputMethodEntry &entry, fcitx::Inpu
         if (actionMacro_) ic->statusArea().addAction(fcitx::StatusGroup::InputMethod, actionMacro_.get());
         if (actionSpellCheck_) ic->statusArea().addAction(fcitx::StatusGroup::InputMethod, actionSpellCheck_.get());
         if (actionDictionary_) ic->statusArea().addAction(fcitx::StatusGroup::InputMethod, actionDictionary_.get());
-        if (actionUserVnDict_) ic->statusArea().addAction(fcitx::StatusGroup::InputMethod, actionUserVnDict_.get());
         if (actionSettings_) ic->statusArea().addAction(fcitx::StatusGroup::InputMethod, actionSettings_.get());
 
         if (actionOutputModeDirect_) actionOutputModeDirect_->update(ic);
@@ -635,7 +624,6 @@ void VnCharKeyEngine::activate(const fcitx::InputMethodEntry &entry, fcitx::Inpu
         if (actionSpellCheck_) actionSpellCheck_->update(ic);
         if (actionDictionary_) actionDictionary_->update(ic);
         if (actionSettings_) actionSettings_->update(ic);
-        if (actionUserVnDict_) actionUserVnDict_->update(ic);
 
         ic->updateUserInterface(fcitx::UserInterfaceComponent::StatusArea);
     }
