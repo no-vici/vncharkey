@@ -165,6 +165,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         km.setSentenceMomentum(defaults.bool(forKey: "vncharkey.sentenceMomentum"))
         km.setMathContext(defaults.bool(forKey: "vncharkey.mathContext"))
         km.setCollisionPrefersVietnamese(defaults.bool(forKey: "vncharkey.collisionPrefersVietnamese"))
+        km.setFrequencyDisambiguation(defaults.bool(forKey: "vncharkey.frequencyDisambiguation"))
         km.setAutoCapitalize(defaults.bool(forKey: "vncharkey.autoCapitalize"))
         if let savedVnWords = defaults.string(forKey: "vncharkey.userVietnameseWords") {
             km.setUserVietnameseWords(savedVnWords)
@@ -363,6 +364,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let collisionVnItem = NSMenuItem(title: "Ưu tiên tiếng Việt khi từ va chạm (list → lít)", action: #selector(toggleCollisionPrefersVietnamese(_:)), keyEquivalent: "")
         collisionVnItem.state = km.getCollisionPrefersVietnamese() ? .on : .off
         advancedMenu.addItem(collisionVnItem)
+
+        let freqDisambigItem = NSMenuItem(title: "Phân giải va chạm theo tần suất (thử nghiệm)", action: #selector(toggleFrequencyDisambiguation(_:)), keyEquivalent: "")
+        freqDisambigItem.state = km.getFrequencyDisambiguation() ? .on : .off
+        advancedMenu.addItem(freqDisambigItem)
 
         let advancedParent = NSMenuItem(title: "Tùy chọn nâng cao...", action: nil, keyEquivalent: "")
         advancedParent.submenu = advancedMenu
@@ -707,6 +712,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let next = !km.getCollisionPrefersVietnamese()
         defaults.set(next, forKey: "vncharkey.collisionPrefersVietnamese")
         km.setCollisionPrefersVietnamese(next)
+        rebuildMenu()
+        syncDashboardControls()
+    }
+
+    @objc func toggleFrequencyDisambiguation(_ sender: NSMenuItem) {
+        guard let km = keyManager else { return }
+        let next = !km.getFrequencyDisambiguation()
+        defaults.set(next, forKey: "vncharkey.frequencyDisambiguation")
+        km.setFrequencyDisambiguation(next)
         rebuildMenu()
         syncDashboardControls()
     }
